@@ -9,8 +9,12 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
+import com.swervedrivespecialties.swervelib.MkModuleConfiguration;
+import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
+import com.swervedrivespecialties.swervelib.MotorType;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
+import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,6 +29,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 import static frc.robot.Constants.*;
 
@@ -90,61 +95,106 @@ private SwerveDriveOdometry odometry;
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         tab.addNumber("Pigeon", ()->{return m_pigeon.getYaw();});
 
-    m_frontLeftModule = Mk3SwerveModuleHelper.createFalcon500(
-            // This parameter is optional, but will allow you to see the current state of the module on the dashboard.
-            tab.getLayout("Front Left Module", BuiltInLayouts.kList)
-                    .withSize(2, 4)
-                    .withPosition(0, 0),
-            // This can either be STANDARD or FAST depending on your gear configuration
-            Mk3SwerveModuleHelper.GearRatio.STANDARD,
-            // This is the ID of the drive motor
-            FRONT_LEFT_MODULE_DRIVE_MOTOR,
-            // This is the ID of the steer motor
-            FRONT_LEFT_MODULE_STEER_MOTOR,
-            // This is the ID of the steer encoder
-            FRONT_LEFT_MODULE_STEER_ENCODER,
-            // This is how much the steer encoder is offset from true zero (In our case, zero is facing straight forward)
-            FRONT_LEFT_MODULE_STEER_OFFSET
-    );
+        m_frontLeftModule = new MkSwerveModuleBuilder (MkModuleConfiguration.getDefaultSteerFalcon500())
+                .withLayout(tab.getLayout("Front Left Module", BuiltInLayouts.kList)
+                        .withSize(2, 4)
+                        .withPosition(0, 0))
+                        .withGearRatio(SdsModuleConfigurations.MK3_STANDARD)
+                        .withDriveMotor(MotorType.FALCON, FRONT_LEFT_MODULE_DRIVE_MOTOR)
+                        .withSteerMotor(MotorType.FALCON, FRONT_LEFT_MODULE_STEER_MOTOR)
+                        .withSteerEncoderPort(FRONT_LEFT_MODULE_STEER_ENCODER)
+                        .withSteerOffset(FRONT_LEFT_MODULE_STEER_OFFSET)
+                        .build();
+
+        m_frontRightModule = new MkSwerveModuleBuilder (MkModuleConfiguration.getDefaultSteerFalcon500())
+                .withLayout(tab.getLayout("Front Right Module", BuiltInLayouts.kList)
+                        .withSize(2, 4)
+                        .withPosition(0, 0))
+                        .withGearRatio(SdsModuleConfigurations.MK3_STANDARD)
+                        .withDriveMotor(MotorType.FALCON, FRONT_RIGHT_MODULE_DRIVE_MOTOR)
+                        .withSteerMotor(MotorType.FALCON, FRONT_RIGHT_MODULE_STEER_MOTOR)
+                        .withSteerEncoderPort(FRONT_RIGHT_MODULE_STEER_ENCODER)
+                        .withSteerOffset(FRONT_RIGHT_MODULE_STEER_OFFSET)
+                        .build();            
+
+        m_backLeftModule = new MkSwerveModuleBuilder (MkModuleConfiguration.getDefaultSteerFalcon500())
+                .withLayout(tab.getLayout("Back Left Module", BuiltInLayouts.kList)
+                        .withSize(2, 4)
+                        .withPosition(0, 0))
+                        .withGearRatio(SdsModuleConfigurations.MK3_STANDARD)
+                        .withDriveMotor(MotorType.FALCON, BACK_LEFT_MODULE_DRIVE_MOTOR)
+                        .withSteerMotor(MotorType.FALCON, BACK_LEFT_MODULE_STEER_MOTOR)
+                        .withSteerEncoderPort(BACK_LEFT_MODULE_STEER_ENCODER)
+                        .withSteerOffset(BACK_LEFT_MODULE_STEER_OFFSET)
+                        .build();     
+
+         m_backRightModule = new MkSwerveModuleBuilder (MkModuleConfiguration.getDefaultSteerFalcon500())
+                .withLayout(tab.getLayout("Back Right Module", BuiltInLayouts.kList)
+                        .withSize(2, 4)
+                        .withPosition(0, 0))
+                        .withGearRatio(SdsModuleConfigurations.MK3_STANDARD)
+                        .withDriveMotor(MotorType.FALCON, BACK_RIGHT_MODULE_DRIVE_MOTOR)
+                        .withSteerMotor(MotorType.FALCON, BACK_RIGHT_MODULE_STEER_MOTOR)
+                        .withSteerEncoderPort(BACK_RIGHT_MODULE_STEER_ENCODER)
+                        .withSteerOffset(BACK_RIGHT_MODULE_STEER_OFFSET)
+                        .build();     
+
+//     m_frontLeftModule = Mk3SwerveModuleHelper.createFalcon500(
+//             // This parameter is optional, but will allow you to see the current state of the module on the dashboard.
+//             tab.getLayout("Front Left Module", BuiltInLayouts.kList)
+//                     .withSize(2, 4)
+//                     .withPosition(0, 0),
+//             // This can either be STANDARD or FAST depending on your gear configuration
+//             Mk3SwerveModuleHelper.GearRatio.STANDARD,
+//             // This is the ID of the drive motor
+//             FRONT_LEFT_MODULE_DRIVE_MOTOR,
+//             // This is the ID of the steer motor
+//             FRONT_LEFT_MODULE_STEER_MOTOR,
+//             // This is the ID of the steer encoder
+//             FRONT_LEFT_MODULE_STEER_ENCODER,
+//             // This is how much the steer encoder is offset from true zero (In our case, zero is facing straight forward)
+//             FRONT_LEFT_MODULE_STEER_OFFSET
+//     );
 
     // We will do the same for the other modules
-    m_frontRightModule = Mk3SwerveModuleHelper.createFalcon500(
-            tab.getLayout("Front Right Module", BuiltInLayouts.kList)
-                    .withSize(2, 4)
-                    .withPosition(2, 0),
-            Mk3SwerveModuleHelper.GearRatio.STANDARD,
-            FRONT_RIGHT_MODULE_DRIVE_MOTOR,
-            FRONT_RIGHT_MODULE_STEER_MOTOR,
-            FRONT_RIGHT_MODULE_STEER_ENCODER,
-            FRONT_RIGHT_MODULE_STEER_OFFSET
-    );
+//     m_frontRightModule = Mk3SwerveModuleHelper.createFalcon500(
+//             tab.getLayout("Front Right Module", BuiltInLayouts.kList)
+//                     .withSize(2, 4)
+//                     .withPosition(2, 0),
+//             Mk3SwerveModuleHelper.GearRatio.STANDARD,
+//             FRONT_RIGHT_MODULE_DRIVE_MOTOR,
+//             FRONT_RIGHT_MODULE_STEER_MOTOR,
+//             FRONT_RIGHT_MODULE_STEER_ENCODER,
+//             FRONT_RIGHT_MODULE_STEER_OFFSET
+//     );
 
-    m_backLeftModule = Mk3SwerveModuleHelper.createFalcon500(
-            tab.getLayout("Back Left Module", BuiltInLayouts.kList)
-                    .withSize(2, 4)
-                    .withPosition(4, 0),
-            Mk3SwerveModuleHelper.GearRatio.STANDARD,
-            BACK_LEFT_MODULE_DRIVE_MOTOR,
-            BACK_LEFT_MODULE_STEER_MOTOR,
-            BACK_LEFT_MODULE_STEER_ENCODER,
-            BACK_LEFT_MODULE_STEER_OFFSET
-    );
+//     m_backLeftModule = Mk3SwerveModuleHelper.createFalcon500(
+//             tab.getLayout("Back Left Module", BuiltInLayouts.kList)
+//                     .withSize(2, 4)
+//                     .withPosition(4, 0),
+//             Mk3SwerveModuleHelper.GearRatio.STANDARD,
+//             BACK_LEFT_MODULE_DRIVE_MOTOR,
+//             BACK_LEFT_MODULE_STEER_MOTOR,
+//             BACK_LEFT_MODULE_STEER_ENCODER,
+//             BACK_LEFT_MODULE_STEER_OFFSET
+//     );
 
-    m_backRightModule = Mk3SwerveModuleHelper.createFalcon500(
-            tab.getLayout("Back Right Module", BuiltInLayouts.kList)
-                    .withSize(2, 4)
-                    .withPosition(6, 0),
-            Mk3SwerveModuleHelper.GearRatio.STANDARD,
-            BACK_RIGHT_MODULE_DRIVE_MOTOR,
-            BACK_RIGHT_MODULE_STEER_MOTOR,
-            BACK_RIGHT_MODULE_STEER_ENCODER,
-            BACK_RIGHT_MODULE_STEER_OFFSET
-    );
+//     m_backRightModule = Mk3SwerveModuleHelper.createFalcon500(
+//             tab.getLayout("Back Right Module", BuiltInLayouts.kList)
+//                     .withSize(2, 4)
+//                     .withPosition(6, 0),
+//             Mk3SwerveModuleHelper.GearRatio.STANDARD,
+//             BACK_RIGHT_MODULE_DRIVE_MOTOR,
+//             BACK_RIGHT_MODULE_STEER_MOTOR,
+//             BACK_RIGHT_MODULE_STEER_ENCODER,
+//             BACK_RIGHT_MODULE_STEER_OFFSET
+//     );
+
         swerveModules = new SwerveModule[4];
         swerveModules[0] = m_frontLeftModule;
         swerveModules[1] = m_frontRightModule;
-        swerveModules[3] = m_backRightModule;
         swerveModules[2] = m_backLeftModule;
+        swerveModules[3] = m_backRightModule;
 
         odometry = new SwerveDriveOdometry(m_kinematics
                                          , getAngleRotation2d()
@@ -175,22 +225,22 @@ private SwerveDriveOdometry odometry;
 
   @Override
   public void periodic() {
-    odometry.update(getAngleRotation2d(), getModulePositions());
+//    odometry.update(getAngleRotation2d(), getModulePositions());
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
-    SwerveModuleState[] currentStates = getModuleStates();
-        for(int i=0;i<4;i++){
-          states[i]=SwerveModuleState.optimize(states[i], currentStates[i].angle);
+//    SwerveModuleState[] currentStates = getModuleStates();
+//         for(int i=0;i<4;i++){
+//           states[i]=SwerveModuleState.optimize(states[i], currentStates[i].angle);
 
-          if (states[i].speedMetersPerSecond == 0) {
-                states[i].angle = currentStates[i].angle;
-          }
-        } 
-    SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+//           if (states[i].speedMetersPerSecond == 0) {
+//                 states[i].angle = currentStates[i].angle;
+//           }
+//          } 
+//      SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
-    m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[0].angle.getRadians());
-    m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
-    m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
-    m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
+    m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,states[0].angle.getRadians() + Constants.FRONT_LEFT_MODULE_STEER_OFFSET);
+    m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians() + Constants.FRONT_RIGHT_MODULE_STEER_OFFSET);
+    m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians() + Constants.BACK_LEFT_MODULE_STEER_OFFSET);
+    m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians() + Constants.BACK_RIGHT_MODULE_STEER_OFFSET);
 
     SmartDashboard.putNumber("Angle", odometry.getPoseMeters().getRotation().getDegrees());
     SmartDashboard.putNumber("X", odometry.getPoseMeters().getX());
@@ -199,10 +249,10 @@ private SwerveDriveOdometry odometry;
 
 private SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
-                swerveModules[0].getState(),
-                swerveModules[1].getState(),
-                swerveModules[2].getState(),
-                swerveModules[3].getState()
+                new SwerveModuleState(swerveModules[0].getDriveVelocity(), new Rotation2d(swerveModules[0].getSteerAngle())),
+                new SwerveModuleState(swerveModules[1].getDriveVelocity(), new Rotation2d(swerveModules[1].getSteerAngle())),
+                new SwerveModuleState(swerveModules[2].getDriveVelocity(), new Rotation2d(swerveModules[2].getSteerAngle())),
+                new SwerveModuleState(swerveModules[3].getDriveVelocity(), new Rotation2d(swerveModules[3].getSteerAngle())),
         };
 }
 
