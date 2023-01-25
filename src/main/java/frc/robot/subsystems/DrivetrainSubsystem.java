@@ -225,22 +225,22 @@ private SwerveDriveOdometry odometry;
 
   @Override
   public void periodic() {
-//    odometry.update(getAngleRotation2d(), getModulePositions());
+    odometry.update(getAngleRotation2d(), getModulePositions());
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
-//    SwerveModuleState[] currentStates = getModuleStates();
-//         for(int i=0;i<4;i++){
-//           states[i]=SwerveModuleState.optimize(states[i], currentStates[i].angle);
+    SwerveModuleState[] currentStates = getModuleStates();
+             for(int i=0;i<4;i++){
+          states[i]=SwerveModuleState.optimize(states[i], currentStates[i].angle);
 
-//           if (states[i].speedMetersPerSecond == 0) {
-//                 states[i].angle = currentStates[i].angle;
-//           }
-//          } 
-//      SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+          if (states[i].speedMetersPerSecond == 0) {
+                states[i].angle = currentStates[i].angle;
+          }
+         } 
+     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
-    m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,states[0].angle.getRadians() + Constants.FRONT_LEFT_MODULE_STEER_OFFSET);
-    m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians() + Constants.FRONT_RIGHT_MODULE_STEER_OFFSET);
-    m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians() + Constants.BACK_LEFT_MODULE_STEER_OFFSET);
-    m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians() + Constants.BACK_RIGHT_MODULE_STEER_OFFSET);
+    m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,states[0].angle.getRadians());
+    m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
+    m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
+    m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
 
     SmartDashboard.putNumber("Angle", odometry.getPoseMeters().getRotation().getDegrees());
     SmartDashboard.putNumber("X", odometry.getPoseMeters().getX());
