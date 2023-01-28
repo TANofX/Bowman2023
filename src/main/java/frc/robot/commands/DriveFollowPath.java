@@ -185,8 +185,8 @@ public class DriveFollowPath extends CommandBase {
         PathPlannerState desiredState = (PathPlannerState) trajectory.sample(time);
         ChassisSpeeds targetSpeeds = controller.calculate(RobotContainer.m_drivetrainSubsystem.getPoseMeters(), desiredState, new Rotation2d(desiredState.holonomicRotation.getRadians()));
 
-        targetSpeeds.vyMetersPerSecond = -targetSpeeds.vyMetersPerSecond;
-        targetSpeeds.omegaRadiansPerSecond = -targetSpeeds.omegaRadiansPerSecond;
+        targetSpeeds.vyMetersPerSecond = targetSpeeds.vyMetersPerSecond;
+        targetSpeeds.omegaRadiansPerSecond = targetSpeeds.omegaRadiansPerSecond;
 
         // System.out.println("x:   " + RobotContainer.drive.getPoseMeters().getTranslation().getX() + " y:   " + RobotContainer.drive.getPoseMeters().getTranslation().getY() + " r: " + RobotContainer.drive.getPoseMeters().getRotation().getDegrees());
         // System.out.println("tx:  " + desiredState.poseMeters.getTranslation().getX() + " ty: " + desiredState.poseMeters.getTranslation().getY() + " tr:" + desiredState.holonomicRotation.getDegrees());
@@ -196,12 +196,12 @@ public class DriveFollowPath extends CommandBase {
         // SmartDashboard.putNumber("PIDActual", pathController.getPosError());
 
         // Rotation PID
-        // SmartDashboard.putNumber("PIDTarget", desiredState.holonomicRotation.getDegrees());
-        // SmartDashboard.putNumber("PIDACtual", RobotContainer.drive.getAngleDegrees());
+        SmartDashboard.putNumber("PIDTarget", desiredState.holonomicRotation.getDegrees());
+        SmartDashboard.putNumber("PIDACtual", RobotContainer.m_drivetrainSubsystem.getAngleRotation2d().getDegrees());
 
         // Heading PID
         // SmartDashboard.putNumber("PIDTarget", desiredState.poseMeters.getRotation().getDegrees());
-        // SmartDashboard.putNumber("PIDActual", pathController.getCurrentHeading().getDegrees());
+        // SmartDashboard.putNumber("PIDActual", .getDegrees());
         // System.out.println("tr:" + Math.round(desiredState.holonomicRotation.getDegrees()) + ", " + "r:" + Math.round(RobotContainer.drive.getAngleDegrees()) + " | th:" + Math.round(desiredState.poseMeters.getRotation().getDegrees()));
 
         Pose2d currentPose = RobotContainer.m_drivetrainSubsystem.getPoseMeters();

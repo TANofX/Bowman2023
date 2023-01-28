@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.sensors.PigeonIMU;
+import com.ctre.phoenix.sensors.WPI_CANCoder;
 import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.MkModuleConfiguration;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
@@ -51,10 +52,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * <p>
    * This is a measure of how fast the robot should be able to drive in a straight line.
    */
-  //public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
-  public static final double MAX_VELOCITY_METERS_PER_SECOND = 1500.0 / 60.0 *
-          SdsModuleConfigurations.MK3_STANDARD.getDriveReduction() *
-          SdsModuleConfigurations.MK3_STANDARD.getWheelDiameter() * Math.PI;
+  public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
+//  public static final double MAX_VELOCITY_METERS_PER_SECOND = 1500.0 / 60.0 *
+          SdsModuleConfigurations.MK4_L1.getDriveReduction() *
+          SdsModuleConfigurations.MK4_L1.getWheelDiameter() * Math.PI;
   /**
    * The maximum angular velocity of the robot in radians per second.
    * <p>
@@ -94,12 +95,13 @@ private SwerveDriveOdometry odometry;
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         tab.addNumber("Pigeon", ()->{return m_pigeon.getYaw();});
+        tab.addNumber("Reported Yaw", () -> {return getGyroscopeRotation().getDegrees();});
 
         m_frontLeftModule = new MkSwerveModuleBuilder (MkModuleConfiguration.getDefaultSteerFalcon500())
                 .withLayout(tab.getLayout("Front Left Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
-                        .withGearRatio(SdsModuleConfigurations.MK3_STANDARD)
+                        .withGearRatio(SdsModuleConfigurations.MK4_L1)
                         .withDriveMotor(MotorType.FALCON, FRONT_LEFT_MODULE_DRIVE_MOTOR)
                         .withSteerMotor(MotorType.FALCON, FRONT_LEFT_MODULE_STEER_MOTOR)
                         .withSteerEncoderPort(FRONT_LEFT_MODULE_STEER_ENCODER)
@@ -110,7 +112,7 @@ private SwerveDriveOdometry odometry;
                 .withLayout(tab.getLayout("Front Right Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
-                        .withGearRatio(SdsModuleConfigurations.MK3_STANDARD)
+                        .withGearRatio(SdsModuleConfigurations.MK4_L1)
                         .withDriveMotor(MotorType.FALCON, FRONT_RIGHT_MODULE_DRIVE_MOTOR)
                         .withSteerMotor(MotorType.FALCON, FRONT_RIGHT_MODULE_STEER_MOTOR)
                         .withSteerEncoderPort(FRONT_RIGHT_MODULE_STEER_ENCODER)
@@ -121,7 +123,7 @@ private SwerveDriveOdometry odometry;
                 .withLayout(tab.getLayout("Back Left Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
-                        .withGearRatio(SdsModuleConfigurations.MK3_STANDARD)
+                        .withGearRatio(SdsModuleConfigurations.MK4_L1)
                         .withDriveMotor(MotorType.FALCON, BACK_LEFT_MODULE_DRIVE_MOTOR)
                         .withSteerMotor(MotorType.FALCON, BACK_LEFT_MODULE_STEER_MOTOR)
                         .withSteerEncoderPort(BACK_LEFT_MODULE_STEER_ENCODER)
@@ -132,13 +134,17 @@ private SwerveDriveOdometry odometry;
                 .withLayout(tab.getLayout("Back Right Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
-                        .withGearRatio(SdsModuleConfigurations.MK3_STANDARD)
+                        .withGearRatio(SdsModuleConfigurations.MK4_L1)
                         .withDriveMotor(MotorType.FALCON, BACK_RIGHT_MODULE_DRIVE_MOTOR)
                         .withSteerMotor(MotorType.FALCON, BACK_RIGHT_MODULE_STEER_MOTOR)
                         .withSteerEncoderPort(BACK_RIGHT_MODULE_STEER_ENCODER)
                         .withSteerOffset(BACK_RIGHT_MODULE_STEER_OFFSET)
                         .build();     
 
+        tab.addNumber("BL Absolute", ()->{return ((WPI_CANCoder)m_backLeftModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
+        tab.addNumber("FL Absolute", ()->{return ((WPI_CANCoder)m_frontLeftModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
+        tab.addNumber("BR Absolute", ()->{return ((WPI_CANCoder)m_backRightModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
+        tab.addNumber("FR Absolute", ()->{return ((WPI_CANCoder)m_frontRightModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
 //     m_frontLeftModule = Mk3SwerveModuleHelper.createFalcon500(
 //             // This parameter is optional, but will allow you to see the current state of the module on the dashboard.
 //             tab.getLayout("Front Left Module", BuiltInLayouts.kList)
@@ -221,6 +227,10 @@ private SwerveDriveOdometry odometry;
 
   public void drive(ChassisSpeeds chassisSpeeds) {
     m_chassisSpeeds = chassisSpeeds;
+    SmartDashboard.putNumber("X-speed", chassisSpeeds.vxMetersPerSecond);
+    SmartDashboard.putNumber("Y-speed", chassisSpeeds.vyMetersPerSecond);
+    SmartDashboard.putNumber("Rotaion-speed", chassisSpeeds.omegaRadiansPerSecond);
+    
   }
 
   @Override
@@ -291,6 +301,14 @@ public void enableBrakeMode(boolean b) {
 
 public Rotation2d getAngleRotation2d() {
     return getGyroscopeRotation();
+}
+
+public double getRoll() {
+        return m_pigeon.getRoll();
+}
+
+public double getPitch() {
+        return m_pigeon.getPitch();
 }
  
 }
