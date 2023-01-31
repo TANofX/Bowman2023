@@ -258,7 +258,7 @@ public final class Constants {
                                     0, 0,
                                     0)); // Cam mounted facing forward, half a meter forward of center, half a meter up
             // from center.
-            static final String cameraName = "Microsoft_LifeCam_HD-3000";
+            static final String cameraName = "Global_Shutter_Camera";
         }
     }
     

@@ -12,6 +12,7 @@ import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,10 +24,16 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.PhotonCameraWrapper;
 
 import static frc.robot.Constants.*;
+
+import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
 
 public class DrivetrainSubsystem extends SubsystemBase {
   /**
@@ -83,12 +90,22 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final SwerveModule m_backRightModule;
   private final SwerveModule swerveModules[];
 
+  private final Field2d fieldSim = new Field2d();
+  public PhotonCameraWrapper pcw;
+
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 private SwerveDriveOdometry odometry;
+private SwerveDrivePoseEstimator swervePoseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getAngleRotation2d(), getModulePositions(), getPoseMeters());
 
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         tab.addNumber("Pigeon", ()->{return m_pigeon.getYaw();});
+
+        
+
+        pcw = new PhotonCameraWrapper();
+       
+
 
     m_frontLeftModule = Mk3SwerveModuleHelper.createFalcon500(
             // This parameter is optional, but will allow you to see the current state of the module on the dashboard.
@@ -196,7 +213,26 @@ private SwerveDriveOdometry odometry;
     SmartDashboard.putNumber("X", odometry.getPoseMeters().getX());
     SmartDashboard.putNumber("Y", odometry.getPoseMeters().getY());
   }
+  public void updateOdometry() {
+        swervePoseEstimator.update(getGyroscopeRotation(), getModulePositions());
 
+        // Also apply vision measurements. We use 0.3 seconds in the past as an example
+        // -- o
+        // a real robot, this must be calculated based either on latency or timestamps.
+        Optional<EstimatedRobotPose> result = pcw.getEstimatedGlobalPose(swervePoseEstimator.getEstimatedPosition());
+
+        if (result.isPresent()) {
+                EstimatedRobotPose camPose = result.get();
+                swervePoseEstimator.addVisionMeasurement(
+                camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+                fieldSim.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
+        } else {
+                // move it way off the screen to make it disappear
+                fieldSim.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
+        }
+
+        fieldSim.setRobotPose(swervePoseEstimator.getEstimatedPosition());
+}
 private SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
                 swerveModules[0].getState(),
