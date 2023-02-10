@@ -14,6 +14,9 @@ import frc.robot.subsystems.ExampleSubsystem;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -32,6 +35,8 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(Constants.XBOX_PORT);
+
+private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -53,10 +58,23 @@ public class RobotContainer {
     // new Trigger(m_exampleSubsystem::exampleCondition)
     //     .onTrue(new ExampleCommand(m_exampleSubsystem));
     m_driverController.a().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.zeroGyroscope()));
-    m_driverController.b().onTrue(new DriveFollowPath("Around The Charge", 2.0, 0.5, true));//Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared, true));
+    // m_driverController.b().onTrue(new DriveFollowPath("Around The Charge", 2.0, 0.5, true));//Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared, true));
     m_driverController.x().onTrue(new Autobalance(Autobalance.BalancePoint.LEVEL));//Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared, true));
     m_driverController.y().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
-    m_driverController.start().onTrue(new DriveFollowPath("P1 2 (place, out, take, back, place)", 2.0, 0.5, true));
+    // m_driverController.start().onTrue(new DriveFollowPath("P1 2 (place, out, take, back, place)", 2.0, 0.5, true));
+
+    autChooser.addOption("L1 Balance", new DriveFollowPath("L1 Balance", 2.0, 0.5, true));
+    autChooser.addOption("L1, Out Top, Pick A, L1", new DriveFollowPath("L1, Out Top, Pick A, L1", 2.0, 0.5, true));
+    autChooser.addOption("L1, Out Top, Pick A, L3", new DriveFollowPath("L1, Out Top, Pick A, L3", 2.0, 0.5, true));
+    autChooser.addOption("L2 Balance", new DriveFollowPath("L2 Balance", 2.0, 0.5, true));
+    autChooser.addOption("L2, Out Bottom, Pick D, L2", new DriveFollowPath("L2, Out Bottom, Pick D, L2", 2.0, 0.5, true));
+    autChooser.addOption("L3 Balance", new DriveFollowPath("L3 Balance", 2.0, 0.5, true));
+    autChooser.addOption("L4, Balance", new DriveFollowPath("L4, Balance", 2.0, 0.5, true));
+    autChooser.addOption("L4, Over, Balance", new DriveFollowPath("L4, Over, Balance", 2.0, 0.5, true));
+    autChooser.addOption("L4, Over ", new DriveFollowPath("L4 Over", 2.0, 0.5, true));
+    ShuffleboardTab autotab = Shuffleboard.getTab("Auto Selection");
+    autotab.add("Choose Your Autonomous Mode", autChooser);
+
     // m_driverController.b().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.resetOdometry(m_drivetrainSubsystem.getPoseMeters())));    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
@@ -93,7 +111,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null; //Autos.exampleAuto(m_exampleSubsystem);
+    return autChooser.getSelected(); //Autos.exampleAuto(m_exampleSubsystem);
   }
 
   private static double deadband(double value, double deadband) {
