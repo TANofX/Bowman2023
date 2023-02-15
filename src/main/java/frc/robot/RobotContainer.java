@@ -4,13 +4,12 @@
 
 package frc.robot;
 
-import frc.robot.commands.Autobalance;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.commands.DriveFollowPath;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.GreekArm;
 
 import java.util.function.DoubleSupplier;
 
@@ -27,11 +26,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public static final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+  //public static final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(Constants.XBOX_PORT);
+  private static final GreekArm m_arm = new GreekArm();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -52,12 +52,18 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     // new Trigger(m_exampleSubsystem::exampleCondition)
     //     .onTrue(new ExampleCommand(m_exampleSubsystem));
-    m_driverController.a().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.zeroGyroscope()));
-    m_driverController.b().onTrue(new DriveFollowPath("Around The Charge", 2.0, 0.5, true));//Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared, true));
-    m_driverController.x().onTrue(new Autobalance(Autobalance.BalancePoint.LEVEL));//Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared, true));
-    m_driverController.y().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
-    m_driverController.start().onTrue(new DriveFollowPath("P1 2 (place, out, take, back, place)", 2.0, 0.5, true));
-    // m_driverController.b().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.resetOdometry(m_drivetrainSubsystem.getPoseMeters())));    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
+    m_driverController.a().onTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
+    m_driverController.b().onTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
+
+    m_driverController.x().onTrue(new InstantCommand(() -> {m_arm.stopshoulder(); m_arm.stopelbow(); }));
+
+    m_driverController.povUp().onTrue(new InstantCommand(() -> m_arm.moveelbowup()));
+    m_driverController.povDown().onTrue(new InstantCommand(() -> m_arm.elbowdown()));
+
+    m_driverController.y().onTrue(new InstantCommand(() -> m_arm.toggleGripper()));
+    // m_driverController.y().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
+    // m_driverController.start().onTrue(new DriveFollowPath("P1 2 (place, out, take, back, place)", 2.0, 0.5, true));
+    // // m_driverController.b().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.resetOdometry(m_drivetrainSubsystem.getPoseMeters())));    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
     // Set up the default command for the drivetrain.
@@ -65,25 +71,25 @@ public class RobotContainer {
     // Left stick Y axis -> forward and backwards movement
     // Left stick X axis -> left and right movement
     // Right stick X axis -> rotation
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-            m_drivetrainSubsystem,
-            new DoubleSupplier() {
-              @Override
-                  public double getAsDouble() {
-                      return -modifyAxis(m_driverController.getLeftY()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
-                  }
-            },
-            new DoubleSupplier() {
-              @Override
-              public double getAsDouble() {
-                  return -modifyAxis(m_driverController.getLeftX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
-              }
-            },
-            new DoubleSupplier() {
-              public double getAsDouble() {
-                return -modifyAxis(m_driverController.getRightX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
-              }
-            }));
+    // m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+    //         m_drivetrainSubsystem,
+    //         new DoubleSupplier() {
+    //           @Override
+    //               public double getAsDouble() {
+    //                   return -modifyAxis(m_driverController.getLeftY()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
+    //               }
+    //         },
+    //         new DoubleSupplier() {
+    //           @Override
+    //           public double getAsDouble() {
+    //               return -modifyAxis(m_driverController.getLeftX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
+    //           }
+    //         },
+    //         new DoubleSupplier() {
+    //           public double getAsDouble() {
+    //             return -modifyAxis(m_driverController.getRightX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+    //           }
+    //         }));
   }
 
   /**
