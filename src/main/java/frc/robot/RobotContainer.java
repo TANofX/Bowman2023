@@ -52,10 +52,10 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     // new Trigger(m_exampleSubsystem::exampleCondition)
     //     .onTrue(new ExampleCommand(m_exampleSubsystem));
-    m_driverController.a().onTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
-    m_driverController.b().onTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
+    m_driverController.a().onTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
+    m_driverController.b().onTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
 
-    m_driverController.x().onTrue(new InstantCommand(() -> {m_arm.stopshoulder(); m_arm.stopelbow(); }));
+    m_driverController.x().onTrue(new InstantCommand(() -> m_arm.stopArm() ));
 
     m_driverController.povUp().onTrue(new InstantCommand(() -> m_arm.moveelbowup()));
     m_driverController.povDown().onTrue(new InstantCommand(() -> m_arm.elbowdown()));

@@ -36,13 +36,41 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class GreekArm extends SubsystemBase {
+
+  private class JointSpeeds {
+    private Rotation2d eSpeed;
+    private Rotation2d sSpeed;
+
+    public JointSpeeds() {
+      eSpeed = Rotation2d.fromRadians(0.0);
+      sSpeed = Rotation2d.fromRadians(0.0);
+    };
+
+    public JointSpeeds(double shoulderRadiansSpeed, double elbowRadiansSpeed) {
+      eSpeed = Rotation2d.fromRadians(elbowRadiansSpeed);
+      sSpeed = Rotation2d.fromRadians(shoulderRadiansSpeed);
+    }
+
+    public JointSpeeds(Rotation2d shoulderSpeed, Rotation2d elbowSpeed) {
+      eSpeed = elbowSpeed;
+      sSpeed = shoulderSpeed;
+    }
+
+    public Rotation2d getShoulderSpeed() {
+      return sSpeed;
+    }
+
+    public Rotation2d getElbowSpeed() {
+      return eSpeed;
+    }
+  }
   /**
    *
    */
-  private static final double TESTING_SPEED = .25;
-  private static final double HERCULES_LENGTH = 38.586;
-  private static final double ARTEMIS_LENGTH = 27.25;
-  private static final double APOLLO_LENGTH = 32.0;
+  private static final Rotation2d TESTING_SPEED = Rotation2d.fromDegrees(.25);
+  private static final double HERCULES_LENGTH = 0.981;//38.586 inches
+  private static final double ARTEMIS_LENGTH = 0.692;//27.25 inches
+  private static final double APOLLO_LENGTH = 0.813; //32.0 inches
 
 private DoubleSolenoid gripperControl;
 private WPI_TalonFX shoulderControl;
@@ -55,8 +83,8 @@ private Translation3d currentHandPosition;
 private Rotation2d currentShoulderAngle;
 private Rotation2d currentElbowAngle;
 
-private double targetShoulderSpeed;
-private double targetElbowSpeed;
+private Rotation2d targetShoulderSpeed  = new Rotation2d();
+private Rotation2d targetElbowSpeed = new Rotation2d();
 
 private PIDController shoulderSpeedController;
 private PIDController elbowSpeedController;
@@ -67,8 +95,8 @@ private PIDController elbowSpeedController;
     elbowControl = new CANSparkMax(Constants.ELBOW_MOTOR_CAN_ID, MotorType.kBrushless);
     gripperControl = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Constants.HAND_SOLENOID_FORWARD_ID, Constants.HAND_SOLENOID_REVERSE_ID);
 
-    shoulderSpeedController = new PIDController(.075, 0, .001);
-    elbowSpeedController = new PIDController(.075, 0, .001);
+    shoulderSpeedController = new PIDController(.05, 0, .00);
+    elbowSpeedController = new PIDController(.05, 0, .00);
 
     shoulderAngle = new WPI_CANCoder(Constants.SHOULDER_ENCODER_CAN_ID);
     elbowAngle = new WPI_CANCoder(Constants.ELBOW_ENCODER_CAN_ID);
@@ -79,22 +107,27 @@ private PIDController elbowSpeedController;
     elbowAngle.configSensorDirection(true);
     elbowAngle.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     elbowAngle.setPosition(elbowAngle.getAbsolutePosition());
+    elbowAngle.getVelocity();
 
     shoulderAngle.configMagnetOffset(237.0);
     shoulderAngle.configSensorDirection(true);
     shoulderAngle.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     shoulderAngle.setPosition(shoulderAngle.getAbsolutePosition());
+    shoulderAngle.getVelocity();
 
     ShuffleboardTab armTab = Shuffleboard.getTab("Greek Arm");
+    armTab.addNumber("shoulderVelocity", () -> {return shoulderAngle.getVelocity();});
+    armTab.addNumber("elbowVelocity", () -> {return elbowAngle.getVelocity();});
+
     armTab.addNumber("Hand X", () -> {return currentHandPosition.getX();});
     armTab.addNumber("Hand Z", () -> {return currentHandPosition.getZ();});
     armTab.add("Gripper State", gripperControl);
 
     armTab.addNumber("Elbow Angle", () -> { return currentElbowAngle.getDegrees();});
-    armTab.addNumber("Elbow Absolute Angle", () -> { return elbowAngle.getAbsolutePosition();});
+    armTab.addNumber("Elbow Absolute Angle", () -> { return normalizeAngle(elbowAngle.getAbsolutePosition());});
 
     armTab.addNumber("Shoulder Angle", () -> {return currentShoulderAngle.getDegrees();});
-    armTab.addNumber("Shoulder Absolute Angle", () -> {return shoulderAngle.getAbsolutePosition();});
+    armTab.addNumber("Shoulder Absolute Angle", () -> {return normalizeAngle(shoulderAngle.getAbsolutePosition());});
   }
 
   public static Translation3d calculateKinematics(double shoulderThetaDegrees, double elbowThetaDegrees) {
@@ -108,24 +141,29 @@ private PIDController elbowSpeedController;
     return new Translation3d(x, 0.0, z);
   }
 
-  public void setJointSpeeds(double shoulderSpeed, double elbowSpeed) {
-    targetShoulderSpeed = shoulderSpeed;
-    targetElbowSpeed = elbowSpeed;
+  public void setEndEffectorSpeeds(double xSpeed, double zSpeed) {
+    JointSpeeds joints = calculateJointSpeeds(xSpeed, zSpeed);
 
+    targetElbowSpeed = joints.getElbowSpeed();
+    targetShoulderSpeed = joints.getShoulderSpeed();
+  }
 
+  public void setJointSpeeds(double shoulderSpeedRadians, double elbowSpeedRadians) {
+    targetShoulderSpeed = Rotation2d.fromRadians(shoulderSpeedRadians);
+    targetElbowSpeed = Rotation2d.fromRadians(elbowSpeedRadians);
   }
 
   public static List<Rotation2d> calculateInverseKinematics(double x, double z) {
     ArrayList<Rotation2d> returnList = new ArrayList<Rotation2d>(2);
     double zPrime = z - HERCULES_LENGTH;
 
-    double elbow = Math.acos((Math.pow(x, 2.0) + Math.pow(zPrime, 2.0) - (Math.pow(ARTEMIS_LENGTH, 2.0) + Math.pow(APOLLO_LENGTH, 2.0))) / (2.0 * APOLLO_LENGTH * ARTEMIS_LENGTH));
+    double elbow = Math.acos(elbowComponentCalc(x, zPrime));
     double shoulder = Math.atan2(zPrime, x) - Math.atan2(APOLLO_LENGTH * Math.sin(elbow), ARTEMIS_LENGTH + APOLLO_LENGTH * Math.cos(elbow));
 
     returnList.add(new Rotation2d(shoulder));
     returnList.add(new Rotation2d(elbow));
 
-    elbow = -1 * Math.acos((Math.pow(x, 2.0) + Math.pow(zPrime, 2.0) - (Math.pow(ARTEMIS_LENGTH, 2.0) + Math.pow(APOLLO_LENGTH, 2.0))) / (2.0 * APOLLO_LENGTH * ARTEMIS_LENGTH));
+    elbow = -1 * Math.acos(elbowComponentCalc(x, zPrime));
     shoulder = Math.atan2(zPrime, x) - Math.atan2(APOLLO_LENGTH * Math.sin(elbow), ARTEMIS_LENGTH + APOLLO_LENGTH * Math.cos(elbow));
 
     returnList.add(new Rotation2d(shoulder));
@@ -133,6 +171,35 @@ private PIDController elbowSpeedController;
 
     return returnList;
   }
+
+  private static double elbowComponentCalc(double x, double zPrime) {
+    return (Math.pow(x, 2.0) + Math.pow(zPrime, 2.0) - (Math.pow(ARTEMIS_LENGTH, 2.0) + Math.pow(APOLLO_LENGTH, 2.0))) / (2.0 * APOLLO_LENGTH * ARTEMIS_LENGTH);
+  }
+
+  private JointSpeeds calculateJointSpeeds(double xSpeed, double ySpeed) {
+    double elbowXPartial = 0.0;
+    double elbowYPartial = 0.0;
+    double shoulderXPartial = 0.0;
+    double shoulderYPartial = 0.0;
+    double zPrime = currentHandPosition.getZ() - HERCULES_LENGTH;
+
+    if (currentElbowAngle.getRadians() >= 0.0) {
+      elbowXPartial = (-1.0 / Math.sqrt(1 - Math.pow(elbowComponentCalc(currentHandPosition.getX(), zPrime), 2.0))) * (currentHandPosition.getX() / (ARTEMIS_LENGTH * APOLLO_LENGTH));
+      elbowYPartial = (-1.0 / Math.sqrt(1 - Math.pow(elbowComponentCalc(currentHandPosition.getX(), zPrime), 2.0))) * (zPrime / (ARTEMIS_LENGTH * APOLLO_LENGTH));
+    } else {
+      elbowXPartial = (1.0 / Math.sqrt(1 - Math.pow(elbowComponentCalc(currentHandPosition.getX(), zPrime), 2.0))) * (currentHandPosition.getX() / (ARTEMIS_LENGTH * APOLLO_LENGTH));
+      elbowYPartial = (1.0 / Math.sqrt(1 - Math.pow(elbowComponentCalc(currentHandPosition.getX(), zPrime), 2.0))) * (currentHandPosition.getZ() / (ARTEMIS_LENGTH * APOLLO_LENGTH));
+    }
+
+    shoulderXPartial = ((-zPrime / Math.pow(currentHandPosition.getX(), 2.0)) / (1 + Math.pow((zPrime / currentHandPosition.getX()), 2.0))) * (((ARTEMIS_LENGTH + APOLLO_LENGTH * currentElbowAngle.getCos()) * (APOLLO_LENGTH * currentElbowAngle.getCos() * elbowXPartial)) - (APOLLO_LENGTH * currentElbowAngle.getSin()) * (-APOLLO_LENGTH * currentElbowAngle.getSin() * elbowXPartial)) / Math.pow(ARTEMIS_LENGTH + APOLLO_LENGTH * currentElbowAngle.getCos(), 2.0);
+    shoulderYPartial = ((1.0 / (1.0 + Math.pow(zPrime / currentHandPosition.getX(), 2.0))) * (1.0 / currentHandPosition.getX())) - ((1.0 / (1.0 + Math.pow((APOLLO_LENGTH * currentElbowAngle.getSin()) / (ARTEMIS_LENGTH + APOLLO_LENGTH * currentElbowAngle.getCos()), 2.0))) * (((ARTEMIS_LENGTH + APOLLO_LENGTH * currentElbowAngle.getCos())*(APOLLO_LENGTH*currentElbowAngle.getCos()*elbowYPartial)-(APOLLO_LENGTH*currentElbowAngle.getSin())*(-APOLLO_LENGTH*currentElbowAngle.getSin()*elbowYPartial)) / Math.pow((ARTEMIS_LENGTH + APOLLO_LENGTH * currentElbowAngle.getCos()), 2.0)));
+
+    double elbowSpeed = xSpeed * (elbowXPartial + elbowYPartial);
+    double shoulderSpeed = ySpeed * (shoulderXPartial + shoulderYPartial);
+
+    return new JointSpeeds(elbowSpeed, shoulderSpeed);
+  }
+
   public void toggleGripper() {
     if (gripperControl.get().equals(Value.kReverse)) {
       gripperControl.set(Value.kForward);
@@ -144,38 +211,69 @@ private PIDController elbowSpeedController;
 
 public void moveshoulderup (){
   targetShoulderSpeed = TESTING_SPEED;
+  shoulderControl.set(ControlMode.PercentOutput, targetShoulderSpeed.getDegrees());
 }
 public void moveshoulderdown (){
- targetShoulderSpeed = -TESTING_SPEED;
+ targetShoulderSpeed = TESTING_SPEED.unaryMinus();
+ shoulderControl.set(ControlMode.PercentOutput, targetShoulderSpeed.getDegrees());
+
 }
 public void stopshoulder (){
   shoulderControl.stopMotor();
-  targetShoulderSpeed = 0;
+  targetShoulderSpeed = Rotation2d.fromDegrees(0.0);
 }
 
 
 
 public void moveelbowup (){
   targetElbowSpeed = TESTING_SPEED;
+ elbowControl.set(targetElbowSpeed.getDegrees());
+
 }
 public void elbowdown (){
-  targetElbowSpeed = -TESTING_SPEED;
+  targetElbowSpeed = TESTING_SPEED.unaryMinus();
+  elbowControl.set(targetElbowSpeed.getDegrees());
+
 
 }
 public void stopelbow (){
   elbowControl.stopMotor();
-  targetElbowSpeed = 0;
+  targetElbowSpeed = Rotation2d.fromDegrees(0.0);
 
+}
+public void stopArm () {
+  stopelbow();
+  stopshoulder();
 }
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     updateState();
-    double shoulderMotor = shoulderSpeedController.calculate(shoulderAngle.getVelocity(), targetShoulderSpeed);
-    double elbowMotor = elbowSpeedController.calculate(elbowAngle.getVelocity(), targetElbowSpeed);
+    double shoulderMotor = shoulderSpeedController.calculate(shoulderAngle.getVelocity(), targetShoulderSpeed.getDegrees());
+    double elbowMotor = elbowSpeedController.calculate(elbowAngle.getVelocity(), targetElbowSpeed.getDegrees());
 
-    shoulderControl.set(ControlMode.PercentOutput, targetShoulderSpeed);
-    elbowControl.set(targetElbowSpeed);
+    if ((currentShoulderAngle.getDegrees() < -70.0) && (currentShoulderAngle.getDegrees() > -110)) {
+      if (shoulderMotor < 0.0) {
+        shoulderMotor = 0.0;
+      }
+    } else if (currentShoulderAngle.getDegrees() < -110) {
+      if (shoulderMotor > 0.0) {
+        shoulderMotor = 0.0;
+      }
+    }
+
+    if (currentElbowAngle.getDegrees() < -150.0) {
+      if (elbowMotor < 0.0) {
+        elbowMotor = 0.0;
+      } 
+    } else if (currentElbowAngle.getDegrees() > 150.0) {
+      if (elbowMotor > 0.0) {
+        elbowMotor = 0.0;
+      } 
+    }
+
+    // shoulderControl.set(ControlMode.PercentOutput, shoulderMotor);
+    // elbowControl.set(elbowMotor);
     SmartDashboard.putNumber("shoulderDemand", shoulderMotor);
     SmartDashboard.putNumber("ElbowDemand", elbowMotor);
 
@@ -185,6 +283,7 @@ public void stopelbow (){
    // elbowControl.set(elbowMotor);
 
   }
+
   private void updateState() {
     currentShoulderAngle = Rotation2d.fromDegrees(normalizeAngle(shoulderAngle.getPosition()));
     currentElbowAngle = Rotation2d.fromDegrees(normalizeAngle(elbowAngle.getPosition()));
