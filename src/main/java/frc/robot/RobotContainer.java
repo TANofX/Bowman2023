@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public static DrivetrainSubsystem m_drivetrainSubsystem;// = new DrivetrainSubsystem();
+  public static DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   public static final FlapperIntake m_intake = new FlapperIntake();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -62,7 +62,8 @@ public class RobotContainer {
     // m_driverController.y().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
     // m_driverController.start().onTrue(new DriveFollowPath("P1 2 (place, out, take, back, place)", 2.0, 0.5, true));
 
-    m_driverController.a().whileTrue(new RunIntake());
+    m_driverController.a().whileTrue(new RunIntake(.9));
+    m_driverController.b().whileTrue(new RunIntake(.25));
     // m_driverController.b().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.resetOdometry(m_drivetrainSubsystem.getPoseMeters())));    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
@@ -72,25 +73,25 @@ public class RobotContainer {
     // Left stick X axis -> left and right movement
     // Right stick X axis -> rotation
 
-    // m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-    //         m_drivetrainSubsystem,
-    //         new DoubleSupplier() {
-    //           @Override
-    //               public double getAsDouble() {
-    //                   return -modifyAxis(m_driverController.getLeftY()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
-    //               }
-    //         },
-    //         new DoubleSupplier() {
-    //           @Override
-    //           public double getAsDouble() {
-    //               return -modifyAxis(m_driverController.getLeftX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
-    //           }
-    //         },
-    //         new DoubleSupplier() {
-    //           public double getAsDouble() {
-    //             return -modifyAxis(m_driverController.getRightX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
-    //           }
-    //         }));
+    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+            m_drivetrainSubsystem,
+            new DoubleSupplier() {
+              @Override
+                  public double getAsDouble() {
+                      return -modifyAxis(m_driverController.getLeftY()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
+                  }
+            },
+            new DoubleSupplier() {
+              @Override
+              public double getAsDouble() {
+                  return -modifyAxis(m_driverController.getLeftX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
+              }
+            },
+            new DoubleSupplier() {
+              public double getAsDouble() {
+                return -modifyAxis(m_driverController.getRightX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+              }
+            }));
   }
 
   /**

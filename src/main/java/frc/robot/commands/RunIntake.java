@@ -8,9 +8,14 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 
+
+
 public class RunIntake extends CommandBase {
   /** Creates a new RunIntake. */
-  public RunIntake() {
+  private double runningSpeed = 0.0;
+  public RunIntake(double speed) {
+    runningSpeed = speed;
+
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(RobotContainer.m_intake);
   }
@@ -24,7 +29,7 @@ public class RunIntake extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    RobotContainer.m_intake.setMotorSpeed(0.25);
+    RobotContainer.m_intake.setMotorSpeed(runningSpeed);
   }
 
   // Called once the command ends or is interrupted.

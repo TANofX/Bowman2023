@@ -33,11 +33,9 @@ public class FlapperIntake extends SubsystemBase {
   private PIDController leftPID;
   private PIDController rightPID;
 
-  Timer flapperTimer = new Timer();
-
   /** Creates a new FlapperIntake. */
   public FlapperIntake() {
-    intakeEjector = new Solenoid(PneumaticsModuleType.CTREPCM, 2);
+    intakeEjector = new Solenoid(PneumaticsModuleType.CTREPCM, 0);
 
     leftMotor = new CANSparkMax(24, MotorType.kBrushless);
     rightMotor = new CANSparkMax(23, MotorType.kBrushless);
@@ -57,8 +55,8 @@ public class FlapperIntake extends SubsystemBase {
     leftAngle.setPosition(leftAngle.getAbsolutePosition());
     rightAngle.setPosition(rightAngle.getAbsolutePosition());
 
-    leftPID = new PIDController(0.005, 0.025, 0.0);
-    rightPID = new PIDController(0.005, 0.025, 0.0);
+    leftPID = new PIDController(0.005, 0.015, 0.0);
+    rightPID = new PIDController(0.005, 0.015, 0.0);
 
     ShuffleboardTab tempTab = Shuffleboard.getTab("Flapper Intake");
       tempTab.addNumber("Left Angle", () -> {return leftAngle.getPosition();});
@@ -75,8 +73,6 @@ public class FlapperIntake extends SubsystemBase {
 
   public void stopMotor() {
     motorSpeed = 0.0;
-
-    flapperTimer.reset();
   }
 
   public void toggleIntakePosition() {
@@ -94,15 +90,22 @@ public class FlapperIntake extends SubsystemBase {
       double rightSpeed = rightPID.calculate(rightAngle.getAbsolutePosition(), 0.0);
 
       if (Math.abs(leftAngle.getAbsolutePosition()) < 2.0) {
-        leftSpeed = 0.0;
+        leftMotor.stopMotor();
+      
+      }
+      else {
+        leftMotor.set(leftSpeed);
       }
 
       if (Math.abs(rightAngle.getAbsolutePosition()) < 2.0) {
-        rightSpeed = 0.0;
+        rightMotor.stopMotor();
+
+      }
+      else {
+        rightMotor.set(rightSpeed);
       }
 
-      leftMotor.set(leftSpeed);      
-      rightMotor.set(rightSpeed);
+      
     }
   }
 }
