@@ -243,12 +243,14 @@ public final class Constants {
         static class FieldConstants {
             static final double length = Units.feetToMeters(47.527);
             static final double width = Units.feetToMeters(26.258);
-            static final double gridDepth = Units.feetToMeters(4.504);
+            //static final double gridDepth = Units.feetToMeters(4.504);
+            static final double gridDepth = Units.feetToMeters(3.314);
             static final double closeWidth = Units.feetToMeters(3.5);
             static final double closeMidWidth = Units.feetToMeters(9);
             static final double midWidth = Units.feetToMeters(14.5);
             static final double farWidth = Units.feetToMeters(22.129);
             static final double humanStationDepth = Units.feetToMeters(1.162);
+            static final double pegFromAT = Units.inchesToMeters(22);
         }
     
         static class VisionConstants {

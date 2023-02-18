@@ -6,28 +6,47 @@
 
 package frc.robot.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import javax.print.attribute.standard.Destination;
+
+import org.apache.commons.lang3.ObjectUtils.Null;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonPoseEstimator;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagDetector.Config;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGenerationException;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants;
+import frc.robot.PhotonCameraWrapper;
 import frc.robot.RobotContainer;
-
+import frc.robot.subsystems.DrivetrainSubsystem;
 import lib.swerve.SwervePath;
 import lib.swerve.SwervePathController;
 
@@ -141,7 +160,6 @@ public class DriveFollowPath extends CommandBase {
     PathPlannerTrajectory trajectory;
     HolonomicDriveController controller;
     boolean resetOdometry;
-
     String pathName;
 
     public DriveFollowPath(String pathname) {
@@ -169,7 +187,13 @@ public class DriveFollowPath extends CommandBase {
 
         this.pathName = pathName;
     }
-
+    TrajectoryConfig config =
+        new TrajectoryConfig(0, 0);
+    Trajectory centerTrajectory = 
+    TrajectoryGenerator.generateTrajectory(RobotContainer.m_drivetrainSubsystem.getPoseMeters(),
+                new ArrayList<Translation2d>(),
+                RobotContainer.m_drivetrainSubsystem.pcw.findTargetScoreLocation().get(),
+                config);
     @Override
     public void initialize() {
         RobotContainer.m_drivetrainSubsystem.enableBrakeMode(true);
@@ -184,7 +208,6 @@ public class DriveFollowPath extends CommandBase {
         double time = timer.get();
         PathPlannerState desiredState = (PathPlannerState) trajectory.sample(time);
         ChassisSpeeds targetSpeeds = controller.calculate(RobotContainer.m_drivetrainSubsystem.getPoseMeters(), desiredState, new Rotation2d(desiredState.holonomicRotation.getRadians()));
-
         targetSpeeds.vyMetersPerSecond = targetSpeeds.vyMetersPerSecond;
         targetSpeeds.omegaRadiansPerSecond = targetSpeeds.omegaRadiansPerSecond;
 
@@ -197,7 +220,7 @@ public class DriveFollowPath extends CommandBase {
 
         // Rotation PID
         SmartDashboard.putNumber("PIDTarget", desiredState.holonomicRotation.getDegrees());
-        SmartDashboard.putNumber("PIDACtual", RobotContainer.m_drivetrainSubsystem.getAngleRotation2d().getDegrees());
+        SmartDashboard.putNumber("PIDActual", RobotContainer.m_drivetrainSubsystem.getAngleRotation2d().getDegrees());
 
         // Heading PID
         // SmartDashboard.putNumber("PIDTarget", desiredState.poseMeters.getRotation().getDegrees());
