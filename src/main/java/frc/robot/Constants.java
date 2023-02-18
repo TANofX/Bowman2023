@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.XboxController;
 
 import javax.lang.model.type.UnionType;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -121,8 +122,14 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
     public static final double DRIVE_MAX_ANGULAR_VELOCITY = 300;
     public static final int INDEXER_BELT_MOTOR_ID = 0;
 
-
-
+    //GreekArm Constants
+    public static final Rotation2d TESTING_SPEED = Rotation2d.fromDegrees(50);
+    public static final double HERCULES_LENGTH = 0.981;//38.586 inches
+    public static final double ARTEMIS_LENGTH = 0.692;//27.25 inches
+    public static final double APOLLO_LENGTH = 0.813; //32.0 inches
+    
+    public static final Rotation2d MAX_SHOULDER_SPEED = Rotation2d.fromDegrees(152);
+    public static final Rotation2d MAX_ELBOW_SPEED = Rotation2d.fromDegrees(160);
     public static final class DriveConstants 
     {
 

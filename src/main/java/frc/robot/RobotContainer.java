@@ -60,6 +60,7 @@ public class RobotContainer {
     m_driverController.povUp().onTrue(new InstantCommand(() -> m_arm.moveelbowup()));
     m_driverController.povDown().onTrue(new InstantCommand(() -> m_arm.elbowdown()));
 
+    m_driverController.rightBumper().onTrue(new InstantCommand(() -> m_arm.setEndEffectorSpeeds(-0.2, 0)));
     m_driverController.y().onTrue(new InstantCommand(() -> m_arm.toggleGripper()));
     // m_driverController.y().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
     // m_driverController.start().onTrue(new DriveFollowPath("P1 2 (place, out, take, back, place)", 2.0, 0.5, true));
