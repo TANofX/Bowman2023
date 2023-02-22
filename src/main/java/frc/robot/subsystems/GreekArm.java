@@ -10,7 +10,9 @@ import java.util.ResourceBundle.Control;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.ctre.phoenix.sensors.WPI_CANCoder;
 import com.pathplanner.lib.auto.PIDConstants;
@@ -110,6 +112,7 @@ private PIDController elbowSpeedController;
     shoulderAngle.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     shoulderAngle.setPosition(shoulderAngle.getAbsolutePosition());
     shoulderAngle.getVelocity();
+    shoulderAngle.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
 
     ShuffleboardTab armTab = Shuffleboard.getTab("Greek Arm");
     armTab.addNumber("shoulderVelocity", () -> {return shoulderAngle.getVelocity();});
@@ -120,10 +123,10 @@ private PIDController elbowSpeedController;
     armTab.add("Gripper State", gripperControl);
 
     armTab.addNumber("Elbow Angle", () -> { return currentElbowAngle.getDegrees();});
-    armTab.addNumber("Elbow Absolute Angle", () -> { return normalizeAngle(elbowAngle.getAbsolutePosition());});
+    armTab.addNumber("Elbow Absolute Angle", () -> { return normalizeElbowAngle(elbowAngle.getAbsolutePosition());});
 
     armTab.addNumber("Shoulder Angle", () -> {return currentShoulderAngle.getDegrees();});
-    armTab.addNumber("Shoulder Absolute Angle", () -> {return normalizeAngle(shoulderAngle.getAbsolutePosition());});
+    armTab.addNumber("Shoulder Absolute Angle", () -> {return normalizeShoulderAngle(shoulderAngle.getAbsolutePosition());});
     armTab.addNumber("Shoulder Target Speed", () -> {return targetShoulderSpeed.getDegrees();});
     armTab.addNumber("Elbow Target Speed", () -> {return targetElbowSpeed.getDegrees();});
     
@@ -245,6 +248,8 @@ public void stopArm () {
   stopshoulder();
 }
 
+
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -255,21 +260,21 @@ public void stopArm () {
     double desiredShoulderSpeed =  targetShoulderSpeed.getRadians()/Constants.MAX_SHOULDER_SPEED.getRadians() + shoulderMotor;
     double desiredElbowSpeed = targetElbowSpeed.getRadians()/Constants.MAX_ELBOW_SPEED.getRadians() + elbowMotor;
 
-    if ((currentShoulderAngle.getDegrees() < -70.0) && (currentShoulderAngle.getDegrees() > -110)) {
-      if (desiredShoulderSpeed < 0.0) {
+    if ((currentShoulderAngle.getDegrees() >= 255.0)) {
+      if (desiredShoulderSpeed > 0.0) {
         desiredShoulderSpeed = 0.0;
       }
-    } else if (currentShoulderAngle.getDegrees() < -110) {
-      if (desiredShoulderSpeed > 0.0) {
+    } else if (currentShoulderAngle.getDegrees() <= 10) {
+      if (desiredShoulderSpeed < 0.0) {
         desiredShoulderSpeed = 0.0;
       }
     }
 
-    if (currentElbowAngle.getDegrees() < -150.0) {
+    if (currentElbowAngle.getDegrees() < -165.0) {
       if (desiredElbowSpeed < 0.0) {
         desiredElbowSpeed = 0.0;
       } 
-    } else if (currentElbowAngle.getDegrees() > 150.0) {
+    } else if (currentElbowAngle.getDegrees() > 165.0) {
       if (desiredElbowSpeed > 0.0) {
         desiredElbowSpeed = 0.0;
       } 
@@ -291,12 +296,12 @@ public void stopArm () {
   }
 
   private void updateState() {
-    currentShoulderAngle = Rotation2d.fromDegrees(normalizeAngle(shoulderAngle.getPosition()));
-    currentElbowAngle = Rotation2d.fromDegrees(normalizeAngle(elbowAngle.getPosition()));
+    currentShoulderAngle = Rotation2d.fromDegrees(normalizeShoulderAngle(shoulderAngle.getPosition()));
+    currentElbowAngle = Rotation2d.fromDegrees(normalizeElbowAngle(elbowAngle.getPosition()));
     currentHandPosition = calculateKinematics(currentShoulderAngle.getDegrees(), currentElbowAngle.getDegrees());
   }
 
-  private double normalizeAngle(double angleInDegrees) {
+  private double normalizeElbowAngle(double angleInDegrees) {
     if (angleInDegrees > 180.0) {
       return angleInDegrees - 360.0;
     }
@@ -306,5 +311,23 @@ public void stopArm () {
     }
 
     return angleInDegrees;
+  }
+  private double normalizeShoulderAngle(double angleInDegrees) {
+    if (angleInDegrees > 360.0) {
+      return angleInDegrees - 360.0;
+    }
+
+    if (angleInDegrees < 0) {
+      return angleInDegrees + 360.0;
+    }
+
+    return angleInDegrees;
+  }
+
+  public Rotation2d getShoulderPosition() {
+    return currentShoulderAngle;
+  }
+  public Rotation2d getElbowPosition() {
+    return currentElbowAngle;
   }
 }

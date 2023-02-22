@@ -123,11 +123,26 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
     public static final int INDEXER_BELT_MOTOR_ID = 0;
 
     //GreekArm Constants
-    public static final Rotation2d TESTING_SPEED = Rotation2d.fromDegrees(50);
+    public static final Rotation2d TESTING_SPEED = Rotation2d.fromDegrees(15);
     public static final double HERCULES_LENGTH = 0.981;//38.586 inches
     public static final double ARTEMIS_LENGTH = 0.692;//27.25 inches
     public static final double APOLLO_LENGTH = 0.813; //32.0 inches
     
+
+    public static final double SHOULDER_STARTING_POSITION = 254.1;
+    public static final double EBLOW_STARTING_POSITION = -162.4;
+
+    public static final double SHOULDER_PICKUP_POSITION = 195;
+    public static final double EBLOW_PICKUP_POSITION = 111.4;
+
+    public static final double SHOULDER_HIGH_POSITION = 142;
+    public static final double EBLOW_HIGH_POSITION = 39.4;
+
+    public static final double SHOULDER_MID_POSITION = 122.3;
+    public static final double EBLOW_MID_POSITION = 91.1;
+
+
+
     public static final Rotation2d MAX_SHOULDER_SPEED = Rotation2d.fromDegrees(152);
     public static final Rotation2d MAX_ELBOW_SPEED = Rotation2d.fromDegrees(160);
     public static final class DriveConstants 

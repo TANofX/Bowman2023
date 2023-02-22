@@ -7,6 +7,7 @@ package frc.robot;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.MoveArmToPosition;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.GreekArm;
@@ -31,7 +32,7 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(Constants.XBOX_PORT);
-  private static final GreekArm m_arm = new GreekArm();
+  public static final GreekArm m_arm = new GreekArm();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -52,8 +53,11 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     // new Trigger(m_exampleSubsystem::exampleCondition)
     //     .onTrue(new ExampleCommand(m_exampleSubsystem));
-    m_driverController.a().onTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
-    m_driverController.b().onTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
+   // m_driverController.a().onTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
+    //m_driverController.b().onTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
+
+    m_driverController.a().onTrue(new MoveArmToPosition(180, 0));
+    m_driverController.b().onTrue(new MoveArmToPosition(254, 0));
 
     m_driverController.x().onTrue(new InstantCommand(() -> m_arm.stopArm() ));
 
