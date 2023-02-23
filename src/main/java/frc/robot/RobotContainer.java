@@ -56,12 +56,13 @@ public class RobotContainer {
    // m_driverController.a().onTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
     //m_driverController.b().onTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
 
-    m_driverController.a().onTrue(new MoveArmToPosition(180, 0));
-    m_driverController.b().onTrue(new MoveArmToPosition(254, 0));
+    m_driverController.a().onTrue(new MoveArmToPosition(180, -90));
+    m_driverController.b().onTrue(new MoveArmToPosition(250, -162));
 
     m_driverController.x().onTrue(new InstantCommand(() -> m_arm.stopArm() ));
 
     m_driverController.povUp().onTrue(new InstantCommand(() -> m_arm.moveelbowup()));
+
     m_driverController.povDown().onTrue(new InstantCommand(() -> m_arm.elbowdown()));
 
     m_driverController.rightBumper().onTrue(new InstantCommand(() -> m_arm.setEndEffectorSpeeds(-0.2, 0)));

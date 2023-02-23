@@ -29,6 +29,9 @@ public class MoveArmToPosition extends CommandBase {
   private double shoulderDirection;
   private double elbowDirection;
 
+  private boolean shoulderAccelerating;
+  private boolean elbowAccelerating;
+
 
   /** Creates a new MoveArmToPosition. */
   public MoveArmToPosition(double shoulderAngleDegrees, double elbowAngleDegrees) {
@@ -50,8 +53,8 @@ public class MoveArmToPosition extends CommandBase {
     shoulderVelocity = 0.0;
     elbowVelocity = 0.0;
 
-    shoulderTime = 3.0/2.0 * (desiredShoulderPosition - currentShoulderPosition.getDegrees()) / MAX_ANGULAR_VELOCITY;
-    elbowTime = 3.0/2.0 * (desiredElbowPosition - currentElbowPosition.getDegrees()) / MAX_ANGULAR_VELOCITY;
+    shoulderTime = 3.0/2.0 * (desiredShoulderPosition - currentShoulderPosition.getDegrees()) * Math.PI/180.0 / MAX_ANGULAR_VELOCITY;
+    elbowTime = 3.0/2.0 * (desiredElbowPosition - currentElbowPosition.getDegrees()) * Math.PI / 180 / MAX_ANGULAR_VELOCITY;
 
     shoulderTimer.reset();
     elbowTimer.reset();
@@ -59,14 +62,17 @@ public class MoveArmToPosition extends CommandBase {
     shoulderTimer.start();
     elbowTimer.start();
 
-    shoulderAccelerationTime = 0.0;
-    elbowAccelerationTime = 0.0;
+    shoulderAccelerationTime = shoulderTime / 2;
+    elbowAccelerationTime = elbowTime / 2;
 
     shoulderDirection = Math.signum(shoulderTime);
     shoulderTime = Math.abs(shoulderTime);
 
     elbowDirection = Math.signum(elbowTime);
-    elbowDirection = Math.abs(elbowTime);
+    elbowTime = Math.abs(elbowTime);
+
+    shoulderAccelerating = true;
+    elbowAccelerating = true;
 
   }
 
@@ -77,21 +83,43 @@ public class MoveArmToPosition extends CommandBase {
     if (shoulderTimer.get() >= (shoulderTime - shoulderAccelerationTime)) {
       shoulderVelocity = MAX_ANGULAR_VELOCITY - ANGULAR_ACCELERATION * (shoulderTimer.get() - (shoulderTime - shoulderAccelerationTime));
     } else
-  if (shoulderVelocity >= MAX_ANGULAR_VELOCITY) {
-    shoulderVelocity = MAX_ANGULAR_VELOCITY;
-    if (shoulderAccelerationTime == 0.0) {
+      if (shoulderVelocity >= MAX_ANGULAR_VELOCITY) {
+        shoulderVelocity = MAX_ANGULAR_VELOCITY;
+    if (shoulderAccelerating == true) {
       shoulderAccelerationTime = shoulderTimer.get();
+      shoulderAccelerating = false;
     }
   }
-    else if (shoulderAccelerationTime == 0.0) {
+    else {
       shoulderVelocity = ANGULAR_ACCELERATION * shoulderTimer.get();
     }
     if (shoulderVelocity < 0.0) {
       shoulderVelocity = 0.0;
     }
 
-    RobotContainer.m_arm.setJointSpeeds(shoulderVelocity * shoulderDirection, 0);
+    elbowVelocity = Math.abs(elbowVelocity);
+    if (elbowTimer.get() >= (elbowTime - elbowAccelerationTime)) {
+      elbowVelocity = MAX_ANGULAR_VELOCITY - ANGULAR_ACCELERATION * (elbowTimer.get() - (elbowTime - elbowAccelerationTime));
+    } else
+      if (elbowVelocity >= MAX_ANGULAR_VELOCITY) {
+        elbowVelocity = MAX_ANGULAR_VELOCITY;
+    if (elbowAccelerating == true) {
+      elbowAccelerationTime = elbowTimer.get();
+      elbowAccelerating = false;
+    }
   }
+    else {
+      elbowVelocity = ANGULAR_ACCELERATION * elbowTimer.get();
+    }
+    if (elbowVelocity < 0.0) {
+      elbowVelocity = 0.0;
+    }
+
+    RobotContainer.m_arm.setJointSpeeds(shoulderVelocity * shoulderDirection, elbowVelocity * elbowDirection);
+  }
+  
+  
+
   
 
   // Called once the command ends or is interrupted.
@@ -103,6 +131,7 @@ public class MoveArmToPosition extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return shoulderTimer.hasElapsed(shoulderTime);
-  }
+    return shoulderTimer.hasElapsed(shoulderTime) && elbowTimer.hasElapsed(elbowTime);
+    
+}
 }

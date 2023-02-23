@@ -105,8 +105,8 @@ private PIDController elbowSpeedController;
     elbowControl = new CANSparkMax(Constants.ELBOW_MOTOR_CAN_ID, MotorType.kBrushless);
     gripperControl = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Constants.HAND_SOLENOID_FORWARD_ID, Constants.HAND_SOLENOID_REVERSE_ID);
 
-    shoulderSpeedController = new PIDController(.002, 0, .00);
-    elbowSpeedController = new PIDController(.002, 0, .00);
+    shoulderSpeedController = new PIDController(.003, 0, .00);
+    elbowSpeedController = new PIDController(.003, 0, .00);
 
     shoulderAngle = new WPI_CANCoder(Constants.SHOULDER_ENCODER_CAN_ID);
     elbowAngle = new WPI_CANCoder(Constants.ELBOW_ENCODER_CAN_ID);
