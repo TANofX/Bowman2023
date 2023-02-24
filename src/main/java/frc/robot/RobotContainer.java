@@ -16,6 +16,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -56,8 +57,8 @@ public class RobotContainer {
    // m_driverController.a().onTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
     //m_driverController.b().onTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
 
-    m_driverController.a().onTrue(new MoveArmToPosition(180, -90));
-    m_driverController.b().onTrue(new MoveArmToPosition(250, -162));
+    m_driverController.a().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(142, 39.4)));
+    m_driverController.b().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(254, -164)));
 
     m_driverController.x().onTrue(new InstantCommand(() -> m_arm.stopArm() ));
 
