@@ -59,12 +59,12 @@ public class RobotContainer {
 
     m_driverController.a().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(142, 39.4)));
     m_driverController.b().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(254, -164)));
-
     m_driverController.x().onTrue(new InstantCommand(() -> m_arm.stopArm() ));
 
-    m_driverController.povUp().onTrue(new InstantCommand(() -> m_arm.moveelbowup()));
 
-    m_driverController.povDown().onTrue(new InstantCommand(() -> m_arm.elbowdown()));
+    m_driverController.povDown().onTrue(new MoveArmToPosition(150, -80).andThen(new MoveArmToPosition(189, 118)));
+
+    m_driverController.povUp().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(122.3, 91.1)));
 
     m_driverController.rightBumper().onTrue(new InstantCommand(() -> m_arm.setEndEffectorSpeeds(-0.2, 0)));
     m_driverController.y().onTrue(new InstantCommand(() -> m_arm.toggleGripper()));

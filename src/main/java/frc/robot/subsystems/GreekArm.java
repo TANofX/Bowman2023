@@ -111,8 +111,8 @@ public class GreekArm extends SubsystemBase {
   private PIDController shoulderController;
   
   private ControlState controlState;
-  private Rotation2d targetShoulderPosition;
-  private Rotation2d targetElbowPosition;
+  private Rotation2d targetShoulderPosition = new Rotation2d();
+  private Rotation2d targetElbowPosition = new Rotation2d();
 
   /** Creates a new GreekArm. */
   public GreekArm() {
@@ -121,19 +121,21 @@ public class GreekArm extends SubsystemBase {
     gripperControl = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Constants.HAND_SOLENOID_FORWARD_ID,
         Constants.HAND_SOLENOID_REVERSE_ID);
 
-    shoulderSpeedController = new PIDController(.003, 0, .00);
-    elbowSpeedController = new PIDController(.003, 0, .00);
+    shoulderSpeedController = new PIDController(.0015, 0, .00);
+    elbowSpeedController = new PIDController(.0015, 0, .00);
 
-    shoulderController = new PIDController(1.6, 1.0, 0.0);
-    shoulderController.setTolerance(3 * Math.PI / 180.0);
-    elbowController = new PIDController(0.6,  0.25, 0.00);
-    elbowController.setTolerance(5 * Math.PI / 180.0);
+    shoulderController = new PIDController(.8, 0.65, 0.005);
+    shoulderController.setTolerance(2 * Math.PI / 180.0);
+    elbowController = new PIDController(0.6,  0.0, 0.00);
+    elbowController.setTolerance(2 * Math.PI / 180.0);
 
     shoulderAngle = new WPI_CANCoder(Constants.SHOULDER_ENCODER_CAN_ID);
     elbowAngle = new WPI_CANCoder(Constants.ELBOW_ENCODER_CAN_ID);
 
     elbowControl.setIdleMode(IdleMode.kBrake);
     shoulderControl.setNeutralMode(NeutralMode.Brake);
+    shoulderControl.configOpenloopRamp(1);
+    elbowControl.setOpenLoopRampRate(1);
     elbowAngle.configMagnetOffset(274.219 + 4.8);
     elbowAngle.configSensorDirection(true);
     elbowAngle.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
@@ -181,6 +183,12 @@ public class GreekArm extends SubsystemBase {
     });
     armTab.addNumber("Elbow Target Speed", () -> {
       return targetElbowSpeed.getDegrees();
+    });
+    armTab.addNumber("Target Shoulder Angle", () -> {
+      return targetShoulderPosition.getDegrees();
+    });
+    armTab.addNumber("Target Elbow Angle", () -> {
+      return targetElbowPosition.getDegrees();
     });
 
     controlState = ControlState.SPEED_CONTROL;
@@ -352,23 +360,14 @@ public class GreekArm extends SubsystemBase {
     stopshoulder();
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    updateState();
-
-    double desiredShoulderSpeed = 0.0;
-    double desiredElbowSpeed = 0.0;
-
-    switch (controlState) {
-      case SPEED_CONTROL:
-        double shoulderMotor = shoulderSpeedController.calculate(shoulderAngle.getVelocity(),
+  private double[] speedControlCalc() {
+    double shoulderMotor = shoulderSpeedController.calculate(shoulderAngle.getVelocity(),
             targetShoulderSpeed.getDegrees());
         double elbowMotor = elbowSpeedController.calculate(elbowAngle.getVelocity(), targetElbowSpeed.getDegrees());
 
-        desiredShoulderSpeed = targetShoulderSpeed.getRadians() / Constants.MAX_SHOULDER_SPEED.getRadians()
+        double desiredShoulderSpeed = targetShoulderSpeed.getRadians() / Constants.MAX_SHOULDER_SPEED.getRadians()
             + shoulderMotor;
-        desiredElbowSpeed = targetElbowSpeed.getRadians() / Constants.MAX_ELBOW_SPEED.getRadians() + elbowMotor;
+        double desiredElbowSpeed = targetElbowSpeed.getRadians() / Constants.MAX_ELBOW_SPEED.getRadians() + elbowMotor;
 
         if ((currentShoulderAngle.getDegrees() >= 255.0)) {
           if (desiredShoulderSpeed > 0.0) {
@@ -388,14 +387,18 @@ public class GreekArm extends SubsystemBase {
           if (desiredElbowSpeed > 0.0) {
             desiredElbowSpeed = 0.0;
           }
-
+        
         }
-        break;
-      case POSITION_CONTROL:
+        return new double[] {
+          desiredShoulderSpeed, desiredElbowSpeed
+        };
+
+      }
+      private void positionControlCalc() {
         double elbowAngle = getElbowPosition().getRadians();
         double shoulderAngle = getShoulderPosition().getRadians();
-        desiredShoulderSpeed = MathUtil.clamp(shoulderController.calculate(shoulderAngle), -0.5, 0.5);
-        desiredElbowSpeed = MathUtil.clamp(elbowController.calculate(elbowAngle), -0.5, 0.5);
+        double desiredShoulderSpeed = MathUtil.clamp(shoulderController.calculate(shoulderAngle), -1.0 , 1.0);
+        double desiredElbowSpeed = MathUtil.clamp(elbowController.calculate(elbowAngle), -1.0, 1.0);
 
         if (shoulderController.atSetpoint()) {
           desiredShoulderSpeed = 0.0;
@@ -404,16 +407,34 @@ public class GreekArm extends SubsystemBase {
         if (elbowController.atSetpoint()) {
           desiredElbowSpeed = 0.0;
         }
+        targetShoulderSpeed = Constants.MAX_SHOULDER_SPEED.times(desiredShoulderSpeed);
+        targetElbowSpeed = Constants.MAX_ELBOW_SPEED.times(desiredElbowSpeed);
+      }
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+    updateState();
+
+   
+
+    double[] desiredSpeeds;
+
+    switch (controlState) {
+      case POSITION_CONTROL:
+        positionControlCalc();
+      
+      case SPEED_CONTROL:
+        desiredSpeeds = speedControlCalc();
+        
         break;
+     
       default:
-        desiredShoulderSpeed = 0.0;
-        desiredElbowSpeed = 0.0;
+        desiredSpeeds = new double[] {0.0, 0.0};
+
     }
 
-    shoulderControl.set(ControlMode.PercentOutput, desiredShoulderSpeed);
-    elbowControl.set(desiredElbowSpeed);
-    SmartDashboard.putNumber("shoulderDemand", desiredShoulderSpeed);
-    SmartDashboard.putNumber("ElbowDemand", desiredElbowSpeed);
+    shoulderControl.set(ControlMode.PercentOutput, desiredSpeeds[0]);
+    elbowControl.set(desiredSpeeds[1]);
 
     // shoulderControl.set(ControlMode.PercentOutput, shoulderMotor);
     // elbowControl.set(elbowMotor);

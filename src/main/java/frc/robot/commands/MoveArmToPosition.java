@@ -49,6 +49,6 @@ private Rotation2d targetElbow;
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return (Math.abs(RobotContainer.m_arm.getShoulderPosition().getDegrees() - targetShoulder.getDegrees()) < 5.0) && (Math.abs(RobotContainer.m_arm.getElbowPosition().getDegrees() - targetElbow.getDegrees()) < 5.0);
+    return (Math.abs(RobotContainer.m_arm.getShoulderPosition().getDegrees() - targetShoulder.getDegrees()) < 2.0) && (Math.abs(RobotContainer.m_arm.getElbowPosition().getDegrees() - targetElbow.getDegrees()) < 2.0);
 }
 }
