@@ -8,15 +8,19 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 public class ConveyerBelt extends SubsystemBase {
   private CANSparkMax conveyerBelt;
   private double runningSpeed = 0;
   
   /** Creates a new ConveyerBelt. */
-  public ConveyerBelt(double conveyerSpeed) {
-    conveyerBelt = new CANSparkMax(0,MotorType.kBrushless);
+  public ConveyerBelt() {
+    conveyerBelt = new CANSparkMax(Constants.CONVEYER_SPARK_MAX_ID, MotorType.kBrushless);
+    conveyerBelt.setOpenLoopRampRate(1.0);
+  }
 
-    runningSpeed = conveyerSpeed;
+  public void runConveyer(double speed) {
+    runningSpeed = speed;
   }
 
   public void periodic() {

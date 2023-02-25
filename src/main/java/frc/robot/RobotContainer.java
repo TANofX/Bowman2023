@@ -9,7 +9,9 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DriveFollowPath;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.RunConveyer;
 import frc.robot.commands.RunIntake;
+import frc.robot.subsystems.ConveyerBelt;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.FlapperIntake;
@@ -31,6 +33,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   public static final FlapperIntake m_intake = new FlapperIntake();
+  public static final ConveyerBelt m_conveyer = new ConveyerBelt();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -64,6 +67,11 @@ public class RobotContainer {
 
     m_driverController.a().whileTrue(new RunIntake(.9));
     m_driverController.b().whileTrue(new RunIntake(.25));
+    m_driverController.x().whileTrue(new RunConveyer(0.5));
+    m_driverController.y().whileTrue(new RunConveyer(-1.0));
+
+    m_driverController.povUp().onTrue(new InstantCommand(() -> {m_intake.toggleIntakePosition();}));
+    
     // m_driverController.b().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.resetOdometry(m_drivetrainSubsystem.getPoseMeters())));    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
@@ -72,8 +80,7 @@ public class RobotContainer {
     // Left stick Y axis -> forward and backwards movement
     // Left stick X axis -> left and right movement
     // Right stick X axis -> rotation
-
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+    RobotContainer.m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
             new DoubleSupplier() {
               @Override
@@ -92,6 +99,8 @@ public class RobotContainer {
                 return -modifyAxis(m_driverController.getRightX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
               }
             }));
+
+    
   }
 
   /**
