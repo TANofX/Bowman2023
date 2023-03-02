@@ -37,76 +37,44 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
 
 
 
-    /**
-     * The left-to-right distance between the drivetrain wheels
-     *
-     * Should be measured from center to center.
-     */
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = .6223; // .6604; // FIXME Measure and set trackwidth
+    public static final double DRIVETRAIN_TRACKWIDTH_METERS = .4953; // .6604; // FIXME Measure and set trackwidth
     /**
      * The front-to-back distance between the drivetrain wheels.
      *
      * Should be measured from center to center.
      */
-    public static final double DRIVETRAIN_WHEELBASE_METERS = .5715; // .6985; // FIXME Measure and set wheelbase
+    public static final double DRIVETRAIN_WHEELBASE_METERS = .6985; // .6985; // FIXME Measure and set wheelbase
 
-    public static final int DRIVETRAIN_PIGEON_ID = 2; // FIXME Set Pigeon ID
+    public static final int DRIVETRAIN_PIGEON_ID = 3; // FIXME Set Pigeon ID
 
-    public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 7; // Falcon D                FIXME Set front left module drive motor ID
-    public static final int BACK_LEFT_MODULE_STEER_MOTOR = 8; // Falcon E                FIXME Set front left module steer motor ID
-    public static final int BACK_LEFT_MODULE_STEER_ENCODER = 13; // Encoder B          FIXME Set front left steer encoder ID
-    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(174.111); //  FIXME Measure and set front left steer offset
+    public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 12; // Falcon D                FIXME Set front left module drive motor ID
+    public static final int BACK_LEFT_MODULE_STEER_MOTOR = 16; // Falcon E                FIXME Set front left module steer motor ID
+    public static final int BACK_LEFT_MODULE_STEER_ENCODER = 52; // Encoder B          FIXME Set front left steer encoder ID
+    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(212.959); //  FIXME Measure and set front left steer offset
 
-    public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 10; // Falcon G              FIXME Set front right drive motor ID
-    public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 11; // Falcon H              FIXME Set front right steer motor ID
-    public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 12; // Encoder A           FIXME Set front right steer encoder ID
-    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(140.186); // FIXME Measure and set front right steer offset
+    public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 11; // Falcon G              FIXME Set front right drive motor ID
+    public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 15; // Falcon H              FIXME Set front right steer motor ID
+    public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 51; // Encoder A           FIXME Set front right steer encoder ID
+    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(205.664 ); // FIXME Measure and set front right steer offset
 
-    public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 4; // Falcon A                FIXME Set back left drive motor ID
-    public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 5; // Falcon B                 FIXME Set back left steer motor ID
-    public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 14; // Encoder C             FIXME Set back left steer encoder ID
-    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(247.939); //   FIXME Measure and set back left steer offset
+    public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 13; // Falcon A                FIXME Set back left drive motor ID
+    public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 17; // Falcon B                 FIXME Set back left steer motor ID
+    public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 53; // Encoder C             FIXME Set back left steer encoder ID
+    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(67.412); //   FIXME Measure and set back left steer offset
 
-    public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 6; // Falcon C                FIXME Set back right drive motor ID
-    public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 9; // Falcon F                FIXME Set back right steer motor ID
-    public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 15; // Encoder D            FIXME Set back right steer encoder ID
-    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(244.951); //  FIXME Measure and set back right steer offset
-
-
-    // Shooter Constants
-    public static final int SHOOTER_CURRENT_LIMIT = 39;
-    public static final int SHOOTER_THRESHOLD_CURRENT = 60;
-    public static final double SHOOTER_THRESHOLD_TIMEOUT = 0.01;
-    public static final double SHOOTER_F = 0.045; //0.04;
-    public static final double SHOOTER_P = 0.125;
-    public static final double SHOOTER_I = 0.0010;//0.00125;
-    public static final double SHOOTER_SPEED = 0.9;
-    public static final double SHOOTER_SPIN_ERROR = 80;
-    public static final int PRIMARY_SHOOTER_ID = 16;
-    public static final int SECONDARY_SHOOTER_ID = 17;
-
-    // Cargo (Ball) Handler Constants
-    public static final int HANDLERSENSOR_1_PORT = 0;
-    public static final int HANDLERSENSOR_2_PORT = 1;
-    public static final int HANDLERSENSOR_3_PORT = 2;
-    public static final int HANDLERSENSOR_4_PORT = 3;
-    public static final int TRANSIT_MOTOR_ID = 18;
-    public static final double TRANSIT_MOTOR_SPEED = -0.5;
-    public static final double CLEAR_TIMEOUT = 2.0;
-
-    // Intake Constants
-    public static final int INTAKE_SOLENOID_FORWARD = 1;
-    public static final int INTAKE_SOLENOID_REVERSE = 0;
-
-    public static final int DETECTABLE_DISTANCE = 250;
-    public static final double REVERSE_INTAKE_TIMEOUT = 1.0;
-    public static final int INTAKE_MOTOR_ID = 19;
-    public static final double INTAKE_SPEED = 0.45;
+    public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 14; // Falcon C                FIXME Set back right drive motor ID
+    public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 18; // Falcon F                FIXME Set back right steer motor ID
+    public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 54; // Encoder D            FIXME Set back right steer encoder ID
+    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(38.584); //  FIXME Measure and set back right steer offset
 
     // Xbox Constants
     public static final int XBOX_PORT = 0;
+    public static final int XBOX_PORT_2 = 1;
     public static final int XBOX_RUNINTAKE_BUTTON = 3;
     public static final double XBOX_DEADBAND = 0.15;
+
+    //Joystick
+    public static final int JOYSTICK_PORT = 1;
 
     // Auto Drives PID
     public static final double DRIVE_POS_ERROR_CONTROLLER_P = 0.1;
@@ -142,6 +110,15 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
     public static final double EBLOW_MID_POSITION = 91.1;
 
 
+    //Intake Constants
+    public static final int INTAKE_LEFT_MOTOR_ID = 24;
+    public static final int INTAKE_RIGHT_MOTOR_ID = 23;
+
+    public static final int INTAKE_LEFT_ENCODER_ID = 22;
+    public static final int INTAKE_RIGHT_ENCODER_ID = 21;
+
+    //Indexer Constants
+    public static final int CONVEYER_SPARK_MAX_ID = 31;
 
     public static final Rotation2d MAX_SHOULDER_SPEED = Rotation2d.fromDegrees(152);
     public static final Rotation2d MAX_ELBOW_SPEED = Rotation2d.fromDegrees(160);
