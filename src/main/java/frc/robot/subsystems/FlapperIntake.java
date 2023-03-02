@@ -36,7 +36,7 @@ public class FlapperIntake extends SubsystemBase {
 
   /** Creates a new FlapperIntake. */
   public FlapperIntake() {
-    intakeEjector = new Solenoid(2, PneumaticsModuleType.REVPH, 15);
+    intakeEjector = new Solenoid(2, PneumaticsModuleType.REVPH, 12);
  
     leftMotor = new CANSparkMax(Constants.INTAKE_LEFT_MOTOR_ID, MotorType.kBrushless);
     rightMotor = new CANSparkMax(Constants.INTAKE_RIGHT_MOTOR_ID, MotorType.kBrushless);
@@ -78,6 +78,13 @@ public class FlapperIntake extends SubsystemBase {
 
   public void toggleIntakePosition() {
     intakeEjector.set(!intakeEjector.get());
+  }
+  public void lowerIntake() {
+    intakeEjector.set(true);
+  }
+  public void liftIntake() {
+    intakeEjector.set(false);
+
   }
 
   @Override

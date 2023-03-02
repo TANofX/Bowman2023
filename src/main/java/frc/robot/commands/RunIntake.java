@@ -23,7 +23,7 @@ public class RunIntake extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    RobotContainer.m_intake.toggleIntakePosition();
+    RobotContainer.m_intake.lowerIntake();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -35,7 +35,7 @@ public class RunIntake extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.m_intake.toggleIntakePosition();
+    RobotContainer.m_intake.liftIntake();
     RobotContainer.m_intake.stopMotor();
   }
 

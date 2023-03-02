@@ -18,6 +18,8 @@ import frc.robot.subsystems.FlapperIntake;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -35,9 +37,12 @@ public class RobotContainer {
   public static final FlapperIntake m_intake = new FlapperIntake();
   public static final ConveyerBelt m_conveyer = new ConveyerBelt();
 
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(Constants.XBOX_PORT);
+  private final CommandXboxController m_operatorController = 
+      new CommandXboxController(Constants.XBOX_PORT_2);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -65,12 +70,18 @@ public class RobotContainer {
     // m_driverController.y().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
     // m_driverController.start().onTrue(new DriveFollowPath("P1 2 (place, out, take, back, place)", 2.0, 0.5, true));
 
-    m_driverController.a().whileTrue(new RunIntake(.9));
-    m_driverController.b().whileTrue(new RunIntake(.25));
-    m_driverController.x().whileTrue(new RunConveyer(0.5));
-    m_driverController.y().whileTrue(new RunConveyer(-1.0));
+    m_driverController.rightTrigger().whileTrue(new RunIntake(.9));
+    m_driverController.leftTrigger().whileTrue(new RunIntake(.25));
+    if (m_operatorController.getRightY() > 0) {
+      new RunConveyer(1.0);
+    }
+   if (m_operatorController.getRightY() < 0) {
+     new RunConveyer(-1.0);
 
-    m_driverController.povUp().onTrue(new InstantCommand(() -> {m_intake.toggleIntakePosition();}));
+   }
+
+    //m_driverController.povUp().onTrue(new InstantCommand(() -> {m_intake.toggleIntakePosition();}));
+    m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {if (m_conveyer.getState() == DoubleSolenoid.Value.kReverse) {m_conveyer.openConveyer();} else {m_conveyer.closeConveyer();}}));
     
     // m_driverController.b().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.resetOdometry(m_drivetrainSubsystem.getPoseMeters())));    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
