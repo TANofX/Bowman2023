@@ -4,39 +4,35 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 
+public class RunConveyer extends CommandBase {
+  private double speed;
 
-
-public class RunIntake extends CommandBase {
-  /** Creates a new RunIntake. */
-  private double runningSpeed = 0.0;
-  public RunIntake(double speed) {
-    runningSpeed = speed;
-
+  /** Creates a new RunConveyer. */
+  public RunConveyer(double conveyerSpeed) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(RobotContainer.m_intake);
+    addRequirements(RobotContainer.m_conveyer);
+
+    speed = conveyerSpeed;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    RobotContainer.m_intake.lowerIntake();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    RobotContainer.m_intake.setMotorSpeed(runningSpeed);
+    RobotContainer.m_conveyer.runConveyer(speed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.m_intake.liftIntake();
-    RobotContainer.m_intake.stopMotor();
+    RobotContainer.m_conveyer.runConveyer(0.0);
   }
 
   // Returns true when the command should end.

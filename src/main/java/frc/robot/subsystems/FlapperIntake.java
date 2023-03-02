@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class FlapperIntake extends SubsystemBase {
   private WPI_CANCoder leftAngle;
@@ -35,13 +36,13 @@ public class FlapperIntake extends SubsystemBase {
 
   /** Creates a new FlapperIntake. */
   public FlapperIntake() {
-    intakeEjector = new Solenoid(PneumaticsModuleType.CTREPCM, 0);
+    intakeEjector = new Solenoid(2, PneumaticsModuleType.REVPH, 12);
+ 
+    leftMotor = new CANSparkMax(Constants.INTAKE_LEFT_MOTOR_ID, MotorType.kBrushless);
+    rightMotor = new CANSparkMax(Constants.INTAKE_RIGHT_MOTOR_ID, MotorType.kBrushless);
 
-    leftMotor = new CANSparkMax(24, MotorType.kBrushless);
-    rightMotor = new CANSparkMax(23, MotorType.kBrushless);
-
-    leftAngle = new WPI_CANCoder(22);
-    rightAngle = new WPI_CANCoder(21);
+    leftAngle = new WPI_CANCoder(Constants.INTAKE_LEFT_ENCODER_ID);
+    rightAngle = new WPI_CANCoder(Constants.INTAKE_RIGHT_ENCODER_ID);
 
     leftMotor.setIdleMode(IdleMode.kBrake);
     rightMotor.setIdleMode(IdleMode.kBrake);
@@ -55,8 +56,8 @@ public class FlapperIntake extends SubsystemBase {
     leftAngle.setPosition(leftAngle.getAbsolutePosition());
     rightAngle.setPosition(rightAngle.getAbsolutePosition());
 
-    leftPID = new PIDController(0.005, 0.015, 0.0);
-    rightPID = new PIDController(0.005, 0.015, 0.0);
+    leftPID = new PIDController(0.0025, 0.0, 0.0);
+    rightPID = new PIDController(0.0025, 0.0, 0.0);
 
     ShuffleboardTab tempTab = Shuffleboard.getTab("Flapper Intake");
       tempTab.addNumber("Left Angle", () -> {return leftAngle.getPosition();});
@@ -77,6 +78,13 @@ public class FlapperIntake extends SubsystemBase {
 
   public void toggleIntakePosition() {
     intakeEjector.set(!intakeEjector.get());
+  }
+  public void lowerIntake() {
+    intakeEjector.set(true);
+  }
+  public void liftIntake() {
+    intakeEjector.set(false);
+
   }
 
   @Override
