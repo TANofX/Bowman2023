@@ -77,7 +77,7 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
     public static final int JOYSTICK_PORT = 1;
 
     // Auto Drives PID
-    public static final double DRIVE_POS_ERROR_CONTROLLER_P = 0.1;
+    public static final double DRIVE_POS_ERROR_CONTROLLER_P = 0.2;
     public static final double DRIVE_POS_ERROR_CONTROLLER_I = 0;
     public static final double DRIVE_POS_ERROR_CONTROLLER_D = 0;
     public static final double DRIVE_POS_ERROR_CONTROLLER_F = 0;
@@ -172,8 +172,8 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
       }
     
       public static final class AutoConstants {
-        public static final double kMaxSpeedMetersPerSecond = 1.8;
-        public static final double kMaxAccelerationMetersPerSecondSquared = 0.9;
+        public static final double kMaxSpeedMetersPerSecond = 3.5;
+        public static final double kMaxAccelerationMetersPerSecondSquared = 1.5;
     
         
     
@@ -205,10 +205,10 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
         static class VisionConstants {
             static final Transform3d robotToCam =
                     new Transform3d(
-                            new Translation3d(0.5, 0.0, 0.5),
+                            new Translation3d(-0.32, 0.21, 0.53),
                             new Rotation3d(
                                     0, 0,
-                                    0)); // Cam mounted facing forward, half a meter forward of center, half a meter up
+                                    Math.PI)); // Cam mounted facing forward, half a meter forward of center, half a meter up
             // from center.
             static final String cameraName = "Global_Shutter_Camera";
         }

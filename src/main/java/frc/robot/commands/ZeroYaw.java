@@ -4,42 +4,34 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
-
-
-public class RunIntake extends CommandBase {
-  /** Creates a new RunIntake. */
-  private double runningSpeed = 0.0;
-  public RunIntake(double speed) {
-    runningSpeed = speed;
-
+public class ZeroYaw extends CommandBase {
+  /** Creates a new ZeroYaw. */
+  public ZeroYaw() {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(RobotContainer.m_intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    RobotContainer.m_drivetrainSubsystem.resetGyroscope(180.0);
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    RobotContainer.m_intake.setMotorSpeed(runningSpeed);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    RobotContainer.m_intake.stopMotor();
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

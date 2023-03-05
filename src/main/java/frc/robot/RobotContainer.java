@@ -4,30 +4,36 @@
 
 package frc.robot;
 
-import frc.robot.commands.Autos;
+import frc.robot.commands.Autobalance;
 import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.DriveFollowPath;
+import frc.robot.commands.LowerIntake;
 import frc.robot.commands.MoveArmToPosition;
+import frc.robot.commands.RaiseIntake;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.GreekArm;
 import frc.robot.commands.RunConveyer;
 import frc.robot.commands.RunIntake;
+import frc.robot.commands.ZeroYaw;
+import frc.robot.commands.Autobalance.BalancePoint;
 import frc.robot.subsystems.ConveyerBelt;
-import frc.robot.subsystems.DrivetrainSubsystem;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.FlapperIntake;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.function.DoubleSupplier;
 
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPlannerTrajectory.EventMarker;
+import com.pathplanner.lib.commands.FollowPathWithEvents;
+
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -57,6 +63,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+    configureAutos();
   }
 
   /**
@@ -98,13 +105,15 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
     m_driverController.rightTrigger().whileTrue(new RunIntake(.9));
     m_driverController.leftTrigger().whileTrue(new RunIntake(.25));
-    if (m_operatorController.getRightY() > 0) {
-      new RunConveyer(1.0);
-    }
-   if (m_operatorController.getRightY() < 0) {
-     new RunConveyer(-1.0);
+    m_operatorController.a().whileTrue(new RunConveyer(-1));
 
-   }
+  //   if (m_operatorController.getRightY() > 0) {
+  //     new RunConveyer(1.0);
+  //   }
+  //  if (m_operatorController.getRightY() < 0) {
+  //    new RunConveyer(-1.0);
+
+  //  }
 
     //m_driverController.povUp().onTrue(new InstantCommand(() -> {m_intake.toggleIntakePosition();}));
     m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {if (m_conveyer.getState() == DoubleSolenoid.Value.kReverse) {m_conveyer.openConveyer();} else {m_conveyer.closeConveyer();}}));
@@ -145,6 +154,47 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
    *
    * @return the command to run in autonomous
    */
+  private void configureAutos() {
+    PathPlannerTrajectory traj = PathPlanner.loadPath("Left Low Double", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+    Command driveComand = m_drivetrainSubsystem.followTrajectoryCommand(traj, true);
+
+    HashMap<String, Command> eventMap = new HashMap<String, Command>(); 
+
+    eventMap.put("runIntake", new RunIntake(0.9).withTimeout(3.0));
+    eventMap.put("runIntakeSlow", new RunIntake(0.25).withTimeout(2.0));
+    eventMap.put("lowerIntake", new LowerIntake());
+    eventMap.put("raiseIntake", new RaiseIntake());
+    eventMap.put("reverseConveyer", new RunConveyer(0.75).withTimeout(0.8));
+
+    System.out.println(eventMap);
+
+    Shuffleboard.getTab("Auto").addNumber("Event Count", () -> {return traj.getMarkers().size();});
+
+    List<EventMarker> markers = traj.getMarkers();
+    for (EventMarker m: markers) {
+      System.out.println(m.names);
+    }
+
+    Command withEvents = new FollowPathWithEvents(driveComand, traj.getMarkers(), eventMap);
+
+    PathPlannerTrajectory chargeTrajectory = PathPlanner.loadPath("Over The Rainbow", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+    Command chargerComand = m_drivetrainSubsystem.followTrajectoryCommand(chargeTrajectory, true);
+    Command chargerWithEvents = new FollowPathWithEvents(chargerComand, chargeTrajectory.getMarkers(), eventMap);
+
+    Command autoCommand = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
+    .andThen(withEvents)
+    .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
+
+    Command autoCommand1 = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
+    .andThen(chargerWithEvents)
+    .andThen(new Autobalance(BalancePoint.LEVEL));
+
+    
+   autChooser.addOption("LeftSide", autoCommand);
+   autChooser.addOption("ChargingStation", autoCommand1);
+   Shuffleboard.getTab("Auto")
+   .add(autChooser);
+  }
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return autChooser.getSelected(); //Autos.exampleAuto(m_exampleSubsystem);

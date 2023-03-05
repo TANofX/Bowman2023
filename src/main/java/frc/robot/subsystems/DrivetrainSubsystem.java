@@ -8,26 +8,32 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.sensors.WPI_CANCoder;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.swervedrivespecialties.swervelib.MkModuleConfiguration;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.PhotonCameraWrapper;
 
 import static frc.robot.Constants.*;
@@ -84,7 +90,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   // cause the angle reading to increase until it wraps back over to zero.
   // FIXME Remove if you are using a Pigeon
  // private final PigeonIMU m_pigeon = new PigeonIMU(DRIVETRAIN_PIGEON_ID);
-  private final Pigeon2 m_pigeon = new Pigeon2(DRIVETRAIN_PIGEON_ID);
+  public final static Pigeon2 m_pigeon = new Pigeon2(DRIVETRAIN_PIGEON_ID);
   // These are our modules. We initialize them in the constructor.
   private final SwerveModule m_frontLeftModule;
   private final SwerveModule m_frontRightModule;
@@ -96,8 +102,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public PhotonCameraWrapper pcw;
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
-  private SwerveDrivePoseEstimator swervePoseEstimator;
-
+  private SwerveDrivePoseEstimator swervePoseEstimator; 
+  private boolean ignoreAprilTags = false;
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         tab.addNumber("Pigeon", ()->{return m_pigeon.getYaw();});
@@ -108,6 +114,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
        
 
         tab.addNumber("Reported Yaw", () -> {return getGyroscopeRotation().getDegrees();});
+        tab.addNumber("max velocity", () -> {return MAX_VELOCITY_METERS_PER_SECOND;} );
 
         m_frontLeftModule = new MkSwerveModuleBuilder (MkModuleConfiguration.getDefaultSteerFalcon500())
                 .withLayout(tab.getLayout("Front Left Module", BuiltInLayouts.kList)
@@ -244,28 +251,31 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public void drive(ChassisSpeeds chassisSpeeds) {
     m_chassisSpeeds = chassisSpeeds;
+
+    defaultDrive();
   }
 
   @Override
   public void periodic() {
     //odometry.update(getAngleRotation2d(), getModulePositions());
     updateOdometry();
-    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
-    SwerveModuleState[] currentStates = getModuleStates();
-             for(int i=0;i<4;i++){
-          states[i]=SwerveModuleState.optimize(states[i], currentStates[i].angle);
-
-          if (states[i].speedMetersPerSecond == 0) {
-                states[i].angle = currentStates[i].angle;
-          }
-         } 
-     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
-
-    m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,states[0].angle.getRadians());
-    m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
-    m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
-    m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
   }
+
+  public void defaultDrive() {
+        SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
+        SwerveModuleState[] currentStates = getModuleStates();
+                 for(int i=0;i<4;i++){
+              states[i]=SwerveModuleState.optimize(states[i], currentStates[i].angle);
+    
+              if (states[i].speedMetersPerSecond == 0) {
+                    states[i].angle = currentStates[i].angle;
+              }
+             } 
+         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+    
+         setModuleStates(states);    
+  }
+
   public void updateOdometry() {
         swervePoseEstimator.update(getGyroscopeRotation(), getModulePositions());
 
@@ -274,7 +284,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         // a real robot, this must be calculated based either on latency or timestamps.
         Optional<EstimatedRobotPose> result = pcw.getEstimatedGlobalPose(swervePoseEstimator.getEstimatedPosition());
 
-        if (result.isPresent()) {
+        if (result.isPresent() && !ignoreAprilTags) {
                 EstimatedRobotPose camPose = result.get();
                 swervePoseEstimator.addVisionMeasurement(
                 camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
@@ -285,6 +295,16 @@ public class DrivetrainSubsystem extends SubsystemBase {
         }
 
         fieldSim.setRobotPose(swervePoseEstimator.getEstimatedPosition());
+}
+public void useAprilTags(boolean b) {
+        ignoreAprilTags = !b;
+}
+
+private void setModuleStates(SwerveModuleState[] states) {
+        m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,states[0].angle.getRadians());
+        m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
+        m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
+        m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());    
 }
 
 private SwerveModuleState[] getModuleStates() {
@@ -314,6 +334,7 @@ public void drive(int i, int j, int k, boolean b) {
 
 public void resetOdometry(Pose2d pose2d) {
         swervePoseEstimator.resetPosition(getAngleRotation2d(), getModulePositions(), pose2d);
+        resetGyroscope(pose2d.getRotation().getDegrees());
         //odometry.resetPosition(getAngleRotation2d(), getModulePositions(), pose2d);
 }
 
@@ -341,5 +362,31 @@ public double getRoll() {
 public double getPitch() {
         return m_pigeon.getPitch();
 }
- 
+
+public void resetGyroscope(double d) {
+        m_pigeon.setYaw(d);
+}
+
+// Assuming this method is part of a drivetrain subsystem that provides the necessary methods
+    public Command followTrajectoryCommand(PathPlannerTrajectory traj, boolean isFirstPath) {
+        return new SequentialCommandGroup(
+             (Command)new InstantCommand(() -> {
+               // Reset odometry for the first path you run during auto
+               if(isFirstPath){
+                   this.resetOdometry(traj.getInitialHolonomicPose());
+               }
+             }),
+             (Command)new PPSwerveControllerCommand(
+                 traj, 
+                 this::getPoseMeters, // Pose supplier
+                 this.m_kinematics, // SwerveDriveKinematics
+                 new PIDController(Constants.DRIVE_POS_ERROR_CONTROLLER_P, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+                 new PIDController(Constants.DRIVE_POS_ERROR_CONTROLLER_P, 0, 0), // Y controller (usually the same values as X controller)
+                 new PIDController(Constants.DRIVE_AUTO_ROTATE_CONTROLLER_P, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+                 this::setModuleStates, // Module states consumer
+                 true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+                 this // Requires this drive subsystem
+             )
+         );
+     }
 }
