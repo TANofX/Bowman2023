@@ -166,14 +166,9 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     eventMap.put("raiseIntake", new RaiseIntake());
     eventMap.put("reverseConveyer", new RunConveyer(0.75).withTimeout(0.8));
 
-    System.out.println(eventMap);
-
-    Shuffleboard.getTab("Auto").addNumber("Event Count", () -> {return traj.getMarkers().size();});
 
     List<EventMarker> markers = traj.getMarkers();
-    for (EventMarker m: markers) {
-      System.out.println(m.names);
-    }
+    
 
     Command withEvents = new FollowPathWithEvents(driveComand, traj.getMarkers(), eventMap);
 

@@ -25,7 +25,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -38,6 +40,7 @@ import frc.robot.PhotonCameraWrapper;
 
 import static frc.robot.Constants.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -98,6 +101,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final SwerveModule m_backRightModule;
   private final SwerveModule swerveModules[];
 
+  private GenericEntry driveEntry;
+  private GenericEntry rotationEntry;
+
   private final Field2d fieldSim = new Field2d();
   public PhotonCameraWrapper pcw;
 
@@ -107,6 +113,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         tab.addNumber("Pigeon", ()->{return m_pigeon.getYaw();});
+        driveEntry = tab.add("driveFraction", 1)
+                        .withWidget(BuiltInWidgets.kNumberSlider)
+                        .withProperties(Map.of("min", 0.1, "max", 1))
+                        .getEntry();
+        rotationEntry = tab.add("rotationFraction", 1)
+                           .withWidget(BuiltInWidgets.kNumberSlider)
+                           .withProperties(Map.of("min", 0.1, "max", 1))
+                           .getEntry();
+
 
         
 
@@ -389,4 +404,13 @@ public void resetGyroscope(double d) {
              )
          );
      }
+
+public double getdriveFraction() {
+        return driveEntry.getDouble(1.0);
+}
+
+public double getrotationFraction() {
+    return rotationEntry.getDouble(1.0);
+}
+
 }

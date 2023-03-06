@@ -210,7 +210,7 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
                                     0, 0,
                                     Math.PI)); // Cam mounted facing forward, half a meter forward of center, half a meter up
             // from center.
-            static final String cameraName = "Global_Shutter_Camera";
+            static final String cameraName = "HD_USB_Camera";
         }
     }
     
