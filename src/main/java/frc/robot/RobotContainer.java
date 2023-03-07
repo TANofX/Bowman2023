@@ -106,7 +106,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     m_driverController.rightTrigger().whileTrue(new RunIntake(.9));
     m_driverController.leftTrigger().whileTrue(new RunIntake(.25));
     m_operatorController.a().whileTrue(new RunConveyer(-1));
-
+    m_operatorController.povDown().onTrue(new RaiseIntake());
   //   if (m_operatorController.getRightY() > 0) {
   //     new RunConveyer(1.0);
   //   }

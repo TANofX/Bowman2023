@@ -349,8 +349,7 @@ public void drive(int i, int j, int k, boolean b) {
 
 public void resetOdometry(Pose2d pose2d) {
         swervePoseEstimator.resetPosition(getAngleRotation2d(), getModulePositions(), pose2d);
-        resetGyroscope(pose2d.getRotation().getDegrees());
-        //odometry.resetPosition(getAngleRotation2d(), getModulePositions(), pose2d);
+        //resetGyroscope(pose2d.getRotation().getDegrees());
 }
 
 public void enableBrakeMode(boolean b) {
