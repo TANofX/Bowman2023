@@ -20,7 +20,7 @@ public class ConveyerBelt extends SubsystemBase {
   /** Creates a new ConveyerBelt. */
   public ConveyerBelt() {
     conveyerBelt = new CANSparkMax(Constants.CONVEYER_SPARK_MAX_ID, MotorType.kBrushless);
-    conveyerBelt.setOpenLoopRampRate(1.0);
+    conveyerBelt.setOpenLoopRampRate(.25);
 
     blockControl = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, 9, 8);
   }

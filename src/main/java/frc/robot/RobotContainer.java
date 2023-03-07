@@ -79,20 +79,24 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     // new Trigger(m_exampleSubsystem::exampleCondition)
     //     .onTrue(new ExampleCommand(m_exampleSubsystem));
-   // m_driverController.a().onTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
-    //m_driverController.b().onTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
+    m_operatorController.povUp().whileTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
+    m_operatorController.povDown().whileTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
+    m_operatorController.povLeft().whileTrue(new InstantCommand(() -> m_arm.moveelbowup()));
+    m_operatorController.povRight().whileTrue(new InstantCommand(() -> m_arm.elbowdown()));
 
-    m_driverController.a().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(142, 39.4)));
-    m_driverController.b().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(254, -164)));
-    m_driverController.x().onTrue(new InstantCommand(() -> m_arm.stopArm() ));
+    m_operatorController.y().onTrue(new InstantCommand(() -> m_arm.stopArm()));
+
+    // m_driverController.a().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(142, 39.4)));
+    // m_driverController.b().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(254, -164)));
+    // m_driverController.x().onTrue(new InstantCommand(() -> m_arm.stopArm() ));
 
 
-    m_driverController.povDown().onTrue(new MoveArmToPosition(150, -80).andThen(new MoveArmToPosition(189, 118)));
+    // m_driverController.povDown().onTrue(new MoveArmToPosition(150, -80).andThen(new MoveArmToPosition(189, 118)));
 
-    m_driverController.povUp().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(122.3, 91.1)));
+    // m_driverController.povUp().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(122.3, 91.1)));
 
-    m_driverController.rightBumper().onTrue(new InstantCommand(() -> m_arm.setEndEffectorSpeeds(-0.2, 0)));
-    m_driverController.y().onTrue(new InstantCommand(() -> m_arm.toggleGripper()));
+    // m_driverController.rightBumper().onTrue(new InstantCommand(() -> m_arm.setEndEffectorSpeeds(-0.2, 0)));
+    m_operatorController.button(7).onTrue(new InstantCommand(() -> m_arm.toggleGripper()));
     // m_driverController.y().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
     // m_driverController.start().onTrue(new DriveFollowPath("P1 2 (place, out, take, back, place)", 2.0, 0.5, true));
     // // m_driverController.b().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.resetOdometry(m_drivetrainSubsystem.getPoseMeters())));    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
@@ -105,15 +109,16 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
     m_driverController.rightTrigger().whileTrue(new RunIntake(.9));
     m_driverController.leftTrigger().whileTrue(new RunIntake(.25));
-    m_operatorController.a().whileTrue(new RunConveyer(-1));
-    m_operatorController.povDown().onTrue(new RaiseIntake());
-  //   if (m_operatorController.getRightY() > 0) {
-  //     new RunConveyer(1.0);
-  //   }
-  //  if (m_operatorController.getRightY() < 0) {
-  //    new RunConveyer(-1.0);
 
-  //  }
+    m_driverController.povUp().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
+    m_driverController.povDown().onTrue(new Autobalance(Autobalance.BalancePoint.BACKWARD));
+    m_driverController.a().onTrue(new Autobalance(Autobalance.BalancePoint.LEVEL));
+
+
+
+    m_conveyer.setDefaultCommand(new RunConveyer(() -> {return modifyAxis(m_operatorController.getRightY());}));
+    
+  
 
     //m_driverController.povUp().onTrue(new InstantCommand(() -> {m_intake.toggleIntakePosition();}));
     m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {if (m_conveyer.getState() == DoubleSolenoid.Value.kReverse) {m_conveyer.openConveyer();} else {m_conveyer.closeConveyer();}}));
