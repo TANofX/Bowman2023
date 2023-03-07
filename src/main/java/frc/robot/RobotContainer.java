@@ -176,6 +176,10 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     Command chargerComand = m_drivetrainSubsystem.followTrajectoryCommand(chargeTrajectory, true);
     Command chargerWithEvents = new FollowPathWithEvents(chargerComand, chargeTrajectory.getMarkers(), eventMap);
 
+    PathPlannerTrajectory rightTrajectory = PathPlanner.loadPath("Right Low Double", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+    Command rightCommand = m_drivetrainSubsystem.followTrajectoryCommand(rightTrajectory, true);
+    Command rightWithEvents = new FollowPathWithEvents(rightCommand, rightTrajectory.getMarkers(), eventMap);
+
     Command autoCommand = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
     .andThen(withEvents)
     .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
@@ -184,9 +188,14 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     .andThen(chargerWithEvents)
     .andThen(new Autobalance(BalancePoint.LEVEL));
 
-    
+    Command autoCommand2 = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
+    .andThen(rightWithEvents)
+    .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
+
+
    autChooser.addOption("LeftSide", autoCommand);
    autChooser.addOption("ChargingStation", autoCommand1);
+   autChooser.addOption("RightSide", autoCommand2);
    Shuffleboard.getTab("Auto")
    .add(autChooser);
   }
