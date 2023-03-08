@@ -125,7 +125,7 @@ public class GreekArm extends SubsystemBase {
     shoulderControl.setNeutralMode(NeutralMode.Brake);
     shoulderControl.configOpenloopRamp(1);
     elbowControl.setOpenLoopRampRate(1);
-    elbowAngle.configMagnetOffset(274.219 + 4.8);
+    elbowAngle.configMagnetOffset(185.111);
     elbowAngle.configSensorDirection(true);
     elbowAngle.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     elbowAngle.setPosition(elbowAngle.getAbsolutePosition());
