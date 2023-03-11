@@ -9,14 +9,18 @@ import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DriveFollowPath;
 import frc.robot.commands.LowerIntake;
 import frc.robot.commands.ManualArm;
+import frc.robot.commands.MoveArmToArmPosition;
 import frc.robot.commands.MoveArmToPosition;
+import frc.robot.commands.OpenGripper;
 import frc.robot.commands.RaiseIntake;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.GreekArm;
 import frc.robot.commands.RunConveyer;
 import frc.robot.commands.RunIntake;
+import frc.robot.commands.StopArm;
 import frc.robot.commands.ZeroYaw;
 import frc.robot.commands.Autobalance.BalancePoint;
+import frc.robot.subsystems.ArmPositions;
 import frc.robot.subsystems.ConveyerBelt;
 import frc.robot.subsystems.FlapperIntake;
 
@@ -30,6 +34,7 @@ import com.pathplanner.lib.PathPlannerTrajectory.EventMarker;
 import com.pathplanner.lib.commands.FollowPathWithEvents;
 
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -65,6 +70,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     // Configure the trigger bindings
     configureBindings();
     configureAutos();
+    configureShuffleBoardButtons();
   }
 
   /**
@@ -85,7 +91,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     // m_operatorController.povLeft().whileTrue(new InstantCommand(() -> m_arm.moveelbowup()));
     // m_operatorController.povRight().whileTrue(new InstantCommand(() -> m_arm.elbowdown()));
 
-    m_operatorController.y().onTrue(new InstantCommand(() -> m_arm.stopArm()));
+    m_operatorController.y().onTrue(new StopArm());
 
     // m_driverController.a().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(142, 39.4)));
     // m_driverController.b().onTrue(new MoveArmToPosition(180, -85).andThen(new MoveArmToPosition(254, -164)));
@@ -118,6 +124,14 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     m_driverController.povDown().whileTrue(new Autobalance(Autobalance.BalancePoint.BACKWARD));
     m_driverController.a().whileTrue(new Autobalance(Autobalance.BalancePoint.LEVEL));
 
+  m_operatorController.a().onTrue(new MoveArmToArmPosition(ArmPositions.MID_SCORE));
+  m_operatorController.x().onTrue(new MoveArmToArmPosition(ArmPositions.HIGH_SCORE));
+  m_operatorController.b().onTrue(new MoveArmToArmPosition(ArmPositions.PICK_UP));
+  m_operatorController.rightBumper().onTrue(new MoveArmToArmPosition(ArmPositions.HOME));
+
+
+
+
 
 
     m_conveyer.setDefaultCommand(new RunConveyer(() -> {return modifyAxis(m_operatorController.getRightY());}));
@@ -140,18 +154,18 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
             new DoubleSupplier() {
               @Override
                   public double getAsDouble() {
-                      return -modifyAxis(m_driverController.getLeftY()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
+                      return -modifyAxis(m_driverController.getLeftY()) * Constants.DRIVE_SPEED_PERCENTAGE * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
                   }
             },
             new DoubleSupplier() {
               @Override
               public double getAsDouble() {
-                  return -modifyAxis(m_driverController.getLeftX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
+                  return -modifyAxis(m_driverController.getLeftX()) *  Constants.DRIVE_SPEED_PERCENTAGE  * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
               }
             },
             new DoubleSupplier() {
               public double getAsDouble() {
-                return -modifyAxis(m_driverController.getRightX()) * (m_driverController.getLeftTriggerAxis() + 1) / 2.0  * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+                return -modifyAxis(m_driverController.getRightX()) *  Constants.DRIVE_SPEED_PERCENTAGE  * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
               }
             }));
 
@@ -240,6 +254,14 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
 
    // Auto choice options
+   autChooser.addOption("Place High", 
+                        new MoveArmToArmPosition(ArmPositions.HIGH_SCORE).raceWith(new WaitCommand(5))
+                        .andThen(new OpenGripper())
+                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
+   autChooser.addOption("Left Blue Place High", 
+                        new MoveArmToArmPosition(ArmPositions.HIGH_SCORE).raceWith(new WaitCommand(5))
+                        .andThen(new OpenGripper())
+                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
    autChooser.addOption("BlueLeftSide", autoCommand);
    autChooser.addOption("BlueChargingStation", autoCommand1);
    autChooser.addOption("BlueRightSide", autoCommand2);
@@ -249,6 +271,16 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
    Shuffleboard.getTab("Auto")
    .add(autChooser);
+  }
+  private void configureShuffleBoardButtons() {
+    ShuffleboardTab tab = Shuffleboard.getTab("Arm Control");
+    tab.add("Home", new MoveArmToArmPosition(ArmPositions.HOME));
+    tab.add("Safe Transition", new MoveArmToArmPosition(ArmPositions.SAFE_TRANSITION));
+    tab.add("Pre Pick Up", new MoveArmToArmPosition(ArmPositions.PRE_PICKUP));
+    tab.add("Pick Up", new MoveArmToArmPosition(ArmPositions.PICK_UP));
+    tab.add("Mid Score", new MoveArmToArmPosition(ArmPositions.MID_SCORE));
+    tab.add("High Score", new MoveArmToArmPosition(ArmPositions.HIGH_SCORE));
+
   }
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous

@@ -5,13 +5,19 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FollowerType;
+import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.ctre.phoenix.sensors.WPI_CANCoder;
+import com.ctre.phoenixpro.signals.InvertedValue;
+import com.ctre.phoenixpro.signals.NeutralModeValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -81,6 +87,7 @@ public class GreekArm extends SubsystemBase {
 
   private DoubleSolenoid gripperControl;
   private WPI_TalonFX shoulderControl;
+  private WPI_TalonFX secondShoulderControl;
   private CANSparkMax elbowControl;
 
   private WPI_CANCoder shoulderAngle;
@@ -98,14 +105,21 @@ public class GreekArm extends SubsystemBase {
   private PIDController elbowSpeedController;
   private PIDController elbowController;
   private PIDController shoulderController;
-  
+
   private ControlState controlState;
   private Rotation2d targetShoulderPosition = new Rotation2d();
   private Rotation2d targetElbowPosition = new Rotation2d();
 
+  private ArmPositions currentArmPosition = ArmPositions.UNKNOWN;
+
   /** Creates a new GreekArm. */
   public GreekArm() {
     shoulderControl = new WPI_TalonFX(Constants.SHOULDER_MOTER_CAN_ID);
+    secondShoulderControl = new WPI_TalonFX(Constants.SECOND_SHOULDER_MOTOR_CAN_ID);
+
+    secondShoulderControl.follow(shoulderControl);
+    secondShoulderControl.setInverted(TalonFXInvertType.OpposeMaster);
+
     elbowControl = new CANSparkMax(Constants.ELBOW_MOTOR_CAN_ID, MotorType.kBrushless);
     gripperControl = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, Constants.HAND_SOLENOID_FORWARD_ID,
         Constants.HAND_SOLENOID_REVERSE_ID);
@@ -113,9 +127,9 @@ public class GreekArm extends SubsystemBase {
     shoulderSpeedController = new PIDController(.0015, 0, .00);
     elbowSpeedController = new PIDController(.0015, 0, .00);
 
-    shoulderController = new PIDController(.8, 0.65, 0.005);
+    shoulderController = new PIDController(.8, 0.0, 0.005);
     shoulderController.setTolerance(2 * Math.PI / 180.0);
-    elbowController = new PIDController(0.6,  0.0, 0.00);
+    elbowController = new PIDController(0.6, 0.0, 0.00);
     elbowController.setTolerance(2 * Math.PI / 180.0);
 
     shoulderAngle = new WPI_CANCoder(Constants.SHOULDER_ENCODER_CAN_ID);
@@ -123,6 +137,7 @@ public class GreekArm extends SubsystemBase {
 
     elbowControl.setIdleMode(IdleMode.kBrake);
     shoulderControl.setNeutralMode(NeutralMode.Brake);
+    secondShoulderControl.setNeutralMode(NeutralMode.Brake);
     shoulderControl.configOpenloopRamp(1);
     elbowControl.setOpenLoopRampRate(1);
     elbowAngle.configMagnetOffset(185.111);
@@ -178,6 +193,9 @@ public class GreekArm extends SubsystemBase {
     });
     armTab.addNumber("Target Elbow Angle", () -> {
       return targetElbowPosition.getDegrees();
+    });
+    armTab.addString("Arm Position", () -> {
+      return currentArmPosition.name();
     });
 
     controlState = ControlState.SPEED_CONTROL;
@@ -351,74 +369,247 @@ public class GreekArm extends SubsystemBase {
 
   private double[] speedControlCalc() {
     double shoulderMotor = shoulderSpeedController.calculate(shoulderAngle.getVelocity(),
-            targetShoulderSpeed.getDegrees());
-        double elbowMotor = elbowSpeedController.calculate(elbowAngle.getVelocity(), targetElbowSpeed.getDegrees());
+        targetShoulderSpeed.getDegrees());
+    double elbowMotor = elbowSpeedController.calculate(elbowAngle.getVelocity(), targetElbowSpeed.getDegrees());
 
-        double desiredShoulderSpeed = targetShoulderSpeed.getRadians() / Constants.MAX_SHOULDER_SPEED.getRadians()
-            + shoulderMotor;
-        double desiredElbowSpeed = targetElbowSpeed.getRadians() / Constants.MAX_ELBOW_SPEED.getRadians() + elbowMotor;
+    double desiredShoulderSpeed = targetShoulderSpeed.getRadians() / Constants.MAX_SHOULDER_SPEED.getRadians()
+        + shoulderMotor;
+    double desiredElbowSpeed = targetElbowSpeed.getRadians() / Constants.MAX_ELBOW_SPEED.getRadians() + elbowMotor;
 
-        if ((currentShoulderAngle.getDegrees() >= 255.0)) {
-          if (desiredShoulderSpeed > 0.0) {
-            desiredShoulderSpeed = 0.0;
-          }
-        } else if (currentShoulderAngle.getDegrees() <= 10) {
-          if (desiredShoulderSpeed < 0.0) {
-            desiredShoulderSpeed = 0.0;
-          }
-        }
-
-        if (currentElbowAngle.getDegrees() < -165.0) {
-          if (desiredElbowSpeed < 0.0) {
-            desiredElbowSpeed = 0.0;
-          }
-        } else if (currentElbowAngle.getDegrees() > 165.0) {
-          if (desiredElbowSpeed > 0.0) {
-            desiredElbowSpeed = 0.0;
-          }
-        
-        }
-        return new double[] {
-          desiredShoulderSpeed, desiredElbowSpeed
-        };
-
+    if ((currentShoulderAngle.getDegrees() >= 255.0)) {
+      if (desiredShoulderSpeed > 0.0) {
+        desiredShoulderSpeed = 0.0;
       }
-      private void positionControlCalc() {
-        double elbowAngle = getElbowPosition().getRadians();
-        double shoulderAngle = getShoulderPosition().getRadians();
-        double desiredShoulderSpeed = MathUtil.clamp(shoulderController.calculate(shoulderAngle), -1.0 , 1.0);
-        double desiredElbowSpeed = MathUtil.clamp(elbowController.calculate(elbowAngle), -1.0, 1.0);
-
-        if (shoulderController.atSetpoint()) {
-          desiredShoulderSpeed = 0.0;
-        }
-
-        if (elbowController.atSetpoint()) {
-          desiredElbowSpeed = 0.0;
-        }
-        targetShoulderSpeed = Constants.MAX_SHOULDER_SPEED.times(desiredShoulderSpeed);
-        targetElbowSpeed = Constants.MAX_ELBOW_SPEED.times(desiredElbowSpeed);
+    } else if (currentShoulderAngle.getDegrees() <= 10) {
+      if (desiredShoulderSpeed < 0.0) {
+        desiredShoulderSpeed = 0.0;
       }
+    }
+
+    if (currentElbowAngle.getDegrees() < -165.0) {
+      if (desiredElbowSpeed < 0.0) {
+        desiredElbowSpeed = 0.0;
+      }
+    } else if (currentElbowAngle.getDegrees() > 165.0) {
+      if (desiredElbowSpeed > 0.0) {
+        desiredElbowSpeed = 0.0;
+      }
+
+    }
+    return new double[] {
+        desiredShoulderSpeed, desiredElbowSpeed
+    };
+
+  }
+
+  private void positionControlCalc() {
+    double elbowAngle = getElbowPosition().getRadians();
+    double shoulderAngle = getShoulderPosition().getRadians();
+    double desiredShoulderSpeed = MathUtil.clamp(shoulderController.calculate(shoulderAngle), -1.0, 1.0);
+    double desiredElbowSpeed = MathUtil.clamp(elbowController.calculate(elbowAngle), -1.0, 1.0);
+
+    if (shoulderController.atSetpoint()) {
+      desiredShoulderSpeed = 0.0;
+    }
+
+    if (elbowController.atSetpoint()) {
+      desiredElbowSpeed = 0.0;
+    }
+    targetShoulderSpeed = Constants.MAX_SHOULDER_SPEED.times(desiredShoulderSpeed);
+    targetElbowSpeed = Constants.MAX_ELBOW_SPEED.times(desiredElbowSpeed);
+  }
+
+  public LinkedList<ArmPositions> getPath(ArmPositions targetArmPosition) {
+    LinkedList<ArmPositions> armPath = new LinkedList<ArmPositions>();
+    switch (currentArmPosition) {
+      case HOME:
+        switch (targetArmPosition) {
+          case HOME:
+            break;
+          case SAFE_TRANSITION:
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            break;
+          case PRE_PICKUP:
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            armPath.add(ArmPositions.PRE_PICKUP);
+            break;
+          case PICK_UP:
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            armPath.add(ArmPositions.PRE_PICKUP);
+            armPath.add(ArmPositions.PICK_UP);
+            break;
+          case PRE_SCORING:
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.PRE_PICKUP);
+            armPath.add(ArmPositions.PRE_SCORING);
+            break;
+          case MID_SCORE:
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            armPath.add(ArmPositions.MID_SCORE);
+            break;
+          case HIGH_SCORE:
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            armPath.add(ArmPositions.LEAVE_SCORING);
+            armPath.add(ArmPositions.HIGH_SCORE);
+            break;
+        }
+        break;
+      case SAFE_TRANSITION:
+        switch (targetArmPosition) {
+          case HOME:
+            armPath.add(ArmPositions.HOME);
+            break;
+          case SAFE_TRANSITION:
+            break;
+          case PRE_PICKUP:
+            break;
+          case PICK_UP:
+            break;
+          case PRE_SCORING:
+            break;
+          case MID_SCORE:
+            break;
+          case HIGH_SCORE:
+            break;
+        }
+        break;
+      case PRE_PICKUP:
+        switch (targetArmPosition) {
+          case HOME:
+            armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.HOME);
+            break;
+          case SAFE_TRANSITION:
+            break;
+          case PRE_PICKUP:
+            break;
+          case PICK_UP:
+            break;
+          case PRE_SCORING:
+            break;
+          case MID_SCORE:
+            break;
+          case HIGH_SCORE:
+            break;
+        }
+        break;
+      case PICK_UP:
+        switch (targetArmPosition) {
+          case HOME:
+          armPath.add(ArmPositions.PRE_PICKUP);
+          armPath.add(ArmPositions.SAFE_TRANSITION);
+          armPath.add(ArmPositions.HOME);
+
+            break;
+          case SAFE_TRANSITION:
+            break;
+          case PRE_PICKUP:
+            break;
+          case PICK_UP:
+            break;
+          case PRE_SCORING:
+            break;
+          case MID_SCORE:
+            armPath.add(ArmPositions.PRE_SCORING);
+            armPath.add(ArmPositions.MID_SCORE);
+            break;
+          case HIGH_SCORE:
+            armPath.add(ArmPositions.PRE_SCORING);
+            armPath.add(ArmPositions.LEAVE_SCORING);
+            armPath.add(ArmPositions.HIGH_SCORE);
+            break;
+        }
+        break;
+      case PRE_SCORING:
+        switch (targetArmPosition) {
+          case HOME:
+            break;
+          case SAFE_TRANSITION:
+            break;
+          case PRE_PICKUP:
+            break;
+          case PICK_UP:
+            break;
+          case PRE_SCORING:
+            break;
+          case MID_SCORE:
+            break;
+          case HIGH_SCORE:
+            break;
+        }
+        break;
+      case MID_SCORE:
+        switch (targetArmPosition) {
+          case HOME:
+           // armPath.add(ArmPositions.PRE_SCORING);
+            armPath.add(ArmPositions.LEAVE_SCORING);
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.HOME);
+            break;
+          case SAFE_TRANSITION:
+            break;
+          case PRE_PICKUP:
+            break;
+          case PICK_UP:
+            break;
+          case PRE_SCORING:
+            break;
+          case MID_SCORE:
+            break;
+          case HIGH_SCORE:
+            break;
+        }
+        break;
+      case HIGH_SCORE:
+        switch (targetArmPosition) {
+          case HOME:
+            //armPath.add(ArmPositions.PRE_SCORING);
+            //armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            armPath.add(ArmPositions.LEAVE_SCORING);
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.HOME);
+            break;
+          case SAFE_TRANSITION:
+            break;
+          case PRE_PICKUP:
+            break;
+          case PICK_UP:
+            break;
+          case PRE_SCORING:
+            break;
+          case MID_SCORE:
+            break;
+          case HIGH_SCORE:
+            break;
+        }
+        break;
+    }
+    return armPath;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     updateState();
-
-   
 
     double[] desiredSpeeds;
 
     switch (controlState) {
       case POSITION_CONTROL:
         positionControlCalc();
-      
+
       case SPEED_CONTROL:
         desiredSpeeds = speedControlCalc();
-        
+
         break;
-     
+
       default:
-        desiredSpeeds = new double[] {0.0, 0.0};
+        desiredSpeeds = new double[] { 0.0, 0.0 };
 
     }
 
@@ -443,6 +634,7 @@ public class GreekArm extends SubsystemBase {
     currentShoulderAngle = Rotation2d.fromDegrees(normalizeShoulderAngle(shoulderAngle.getPosition()));
     currentElbowAngle = Rotation2d.fromDegrees(normalizeElbowAngle(elbowAngle.getPosition()));
     currentHandPosition = calculateKinematics(currentShoulderAngle.getDegrees(), currentElbowAngle.getDegrees());
+    currentArmPosition = ArmPositions.getPosition(currentShoulderAngle, currentElbowAngle);
   }
 
   private double normalizeElbowAngle(double angleInDegrees) {
@@ -476,4 +668,15 @@ public class GreekArm extends SubsystemBase {
   public Rotation2d getElbowPosition() {
     return currentElbowAngle;
   }
+
+public ArmPositions getArmPosition() {
+    return currentArmPosition;
+}
+
+public void openGripper() {
+  gripperControl.set(Value.kForward);
+}
+public void closeGripper() {
+  gripperControl.set(Value.kReverse);
+}
 }
