@@ -109,7 +109,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
   private SwerveDrivePoseEstimator swervePoseEstimator; 
-  private boolean ignoreAprilTags = false;
+  private boolean ignoreAprilTags = true;
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         tab.addNumber("Pigeon", ()->{return m_pigeon.getYaw();});
