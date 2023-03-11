@@ -8,6 +8,7 @@ import frc.robot.commands.Autobalance;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DriveFollowPath;
 import frc.robot.commands.LowerIntake;
+import frc.robot.commands.ManualArm;
 import frc.robot.commands.MoveArmToPosition;
 import frc.robot.commands.RaiseIntake;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -79,10 +80,10 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     // new Trigger(m_exampleSubsystem::exampleCondition)
     //     .onTrue(new ExampleCommand(m_exampleSubsystem));
-    m_operatorController.povUp().whileTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
-    m_operatorController.povDown().whileTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
-    m_operatorController.povLeft().whileTrue(new InstantCommand(() -> m_arm.moveelbowup()));
-    m_operatorController.povRight().whileTrue(new InstantCommand(() -> m_arm.elbowdown()));
+    // m_operatorController.povUp().whileTrue(new InstantCommand(() -> m_arm.moveshoulderup()));
+    // m_operatorController.povDown().whileTrue(new InstantCommand(() -> m_arm.moveshoulderdown()));
+    // m_operatorController.povLeft().whileTrue(new InstantCommand(() -> m_arm.moveelbowup()));
+    // m_operatorController.povRight().whileTrue(new InstantCommand(() -> m_arm.elbowdown()));
 
     m_operatorController.y().onTrue(new InstantCommand(() -> m_arm.stopArm()));
 
@@ -110,9 +111,12 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     m_driverController.rightTrigger().whileTrue(new RunIntake(.9));
     m_driverController.leftTrigger().whileTrue(new RunIntake(.25));
 
-    m_driverController.povUp().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
-    m_driverController.povDown().onTrue(new Autobalance(Autobalance.BalancePoint.BACKWARD));
-    m_driverController.a().onTrue(new Autobalance(Autobalance.BalancePoint.LEVEL));
+    m_driverController.leftBumper().onTrue(new RaiseIntake());
+    m_driverController.rightBumper().onTrue(new LowerIntake());
+
+    m_driverController.povUp().whileTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
+    m_driverController.povDown().whileTrue(new Autobalance(Autobalance.BalancePoint.BACKWARD));
+    m_driverController.a().whileTrue(new Autobalance(Autobalance.BalancePoint.LEVEL));
 
 
 
@@ -151,6 +155,16 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
               }
             }));
 
+            m_arm.setDefaultCommand(new ManualArm(
+              new DoubleSupplier() {
+                @Override
+                public double getAsDouble() {return modifyAxis(m_operatorController.getLeftY());}
+              }, 
+              new DoubleSupplier() {
+                @Override
+                public double getAsDouble() {return modifyAxis(m_operatorController.getLeftX());}
+            }));
+        
     
   }
 
@@ -209,7 +223,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     return autChooser.getSelected(); //Autos.exampleAuto(m_exampleSubsystem);
   }
 
-  private static double deadband(double value, double deadband) {
+  public static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
       if (value > 0.0) {
         return (value - deadband) / (1.0 - deadband);
@@ -221,7 +235,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     }
   }
 
-  private static double modifyAxis(double value) {
+  public static double modifyAxis(double value) {
     // Deadband
     value = deadband(value, 0.15);
     //  Chanced this value from 0.05

@@ -28,8 +28,8 @@ public final class Constants {
     //BUTTON INPUTS FOR FLIGHT STICK CONTROLLER
 public static final int SHOULDER_MOTER_CAN_ID = 40;
 public static final int ELBOW_MOTOR_CAN_ID = 41;
-public static final int HAND_SOLENOID_FORWARD_ID = 0;
-public static final int HAND_SOLENOID_REVERSE_ID = 1;
+public static final int HAND_SOLENOID_FORWARD_ID = 11;
+public static final int HAND_SOLENOID_REVERSE_ID = 10;
 public static final int SHOULDER_ENCODER_CAN_ID = 40;
 public static final int ELBOW_ENCODER_CAN_ID = 41;
 
