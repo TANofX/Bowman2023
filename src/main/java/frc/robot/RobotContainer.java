@@ -253,7 +253,12 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     .andThen(redRightWithEvents)
     .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
 
-   // Auto choice options
+    PathPlannerTrajectory blueLeftTraj = PathPlanner.loadPath("Red Right Low Double", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+    Command blueLeftCommand = m_drivetrainSubsystem.followTrajectoryCommand(blueLeftTraj, true);
+    Command blueLeftWithEvents = new FollowPathWithEvents(blueLeftCommand, blueLeftTraj.getMarkers(), eventMap);
+
+
+    // Auto choice options
    autChooser.addOption("Place High", 
                         new MoveArmToArmPosition(ArmPositions.HIGH_SCORE).raceWith(new WaitCommand(5))
                         .andThen(new OpenGripper())
@@ -261,7 +266,9 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
    autChooser.addOption("Left Blue Place High", 
                         new MoveArmToArmPosition(ArmPositions.HIGH_SCORE).raceWith(new WaitCommand(5))
                         .andThen(new OpenGripper())
-                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
+                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
+                        .alongWith(blueLeftWithEvents))
+                        .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4))));
    autChooser.addOption("BlueLeftSide", autoCommand);
    autChooser.addOption("BlueChargingStation", autoCommand1);
    autChooser.addOption("BlueRightSide", autoCommand2);
