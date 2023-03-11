@@ -27,6 +27,7 @@ public final class Constants {
                         ///////////////////////  D R I V I N G ///////////////////////
     //BUTTON INPUTS FOR FLIGHT STICK CONTROLLER
 public static final int SHOULDER_MOTER_CAN_ID = 40;
+public static final int SECOND_SHOULDER_MOTOR_CAN_ID = 49;
 public static final int ELBOW_MOTOR_CAN_ID = 41;
 public static final int HAND_SOLENOID_FORWARD_ID = 11;
 public static final int HAND_SOLENOID_REVERSE_ID = 10;
@@ -43,6 +44,8 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
      *
      * Should be measured from center to center.
      */
+    static final double DRIVE_SPEED_PERCENTAGE = .75;
+
     public static final double DRIVETRAIN_WHEELBASE_METERS = .6985; // .6985; // FIXME Measure and set wheelbase
 
     public static final int DRIVETRAIN_PIGEON_ID = 3; // FIXME Set Pigeon ID
