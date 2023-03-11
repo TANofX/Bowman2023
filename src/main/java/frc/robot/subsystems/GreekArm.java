@@ -422,9 +422,18 @@ public class GreekArm extends SubsystemBase {
 
     }
 
-    shoulderControl.set(ControlMode.PercentOutput, desiredSpeeds[0]);
-    elbowControl.set(desiredSpeeds[1]);
+    if (desiredSpeeds[0] < 0.001) {
+      shoulderControl.stopMotor();
+    } else {
+      shoulderControl.set(ControlMode.PercentOutput, desiredSpeeds[0]);      
+    }
 
+    if (desiredSpeeds[1] < 0.001) {
+      elbowControl.stopMotor();
+    } else {
+      elbowControl.set(desiredSpeeds[1]);
+    }
+    
     // shoulderControl.set(ControlMode.PercentOutput, shoulderMotor);
     // elbowControl.set(elbowMotor);
 
