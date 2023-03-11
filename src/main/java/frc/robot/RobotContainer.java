@@ -114,9 +114,9 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     m_driverController.leftBumper().onTrue(new RaiseIntake());
     m_driverController.rightBumper().onTrue(new LowerIntake());
 
-    m_driverController.povUp().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
-    m_driverController.povDown().onTrue(new Autobalance(Autobalance.BalancePoint.BACKWARD));
-    m_driverController.a().onTrue(new Autobalance(Autobalance.BalancePoint.LEVEL));
+    m_driverController.povUp().whileTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
+    m_driverController.povDown().whileTrue(new Autobalance(Autobalance.BalancePoint.BACKWARD));
+    m_driverController.a().whileTrue(new Autobalance(Autobalance.BalancePoint.LEVEL));
 
 
 
