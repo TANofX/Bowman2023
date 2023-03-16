@@ -456,6 +456,11 @@ public class GreekArm extends SubsystemBase {
             armPath.add(ArmPositions.LEAVE_SCORING);
             armPath.add(ArmPositions.HIGH_SCORE);
             break;
+          case LEAVE_SCORING:
+          armPath.add(ArmPositions.SAFE_TRANSITION);
+          armPath.add(ArmPositions.PRE_PRE_PICKUP);
+          armPath.add(ArmPositions.LEAVE_SCORING);
+          break;
         }
         break;
       case SAFE_TRANSITION:

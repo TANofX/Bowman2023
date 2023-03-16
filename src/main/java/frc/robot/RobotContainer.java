@@ -253,10 +253,13 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     .andThen(redRightWithEvents)
     .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
 
-    PathPlannerTrajectory blueLeftTraj = PathPlanner.loadPath("Red Right Low Double", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+    PathPlannerTrajectory blueLeftTraj = PathPlanner.loadPath("Left Low Double With Arm", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
     Command blueLeftCommand = m_drivetrainSubsystem.followTrajectoryCommand(blueLeftTraj, true);
     Command blueLeftWithEvents = new FollowPathWithEvents(blueLeftCommand, blueLeftTraj.getMarkers(), eventMap);
 
+    PathPlannerTrajectory redHighCharge = PathPlanner.loadPath("Red High Charge", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+    Command redChargeCommand = m_drivetrainSubsystem.followTrajectoryCommand(redHighCharge, true);
+    Command redChargeWithEvents = new FollowPathWithEvents(redChargeCommand, redHighCharge.getMarkers(), eventMap);
 
     // Auto choice options
    autChooser.addOption("Place High", 
@@ -269,6 +272,12 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
                         .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
                         .alongWith(blueLeftWithEvents))
                         .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4))));
+   autChooser.addOption("Center Red Place High", 
+                        new MoveArmToArmPosition(ArmPositions.HIGH_SCORE).raceWith(new WaitCommand(5))
+                        .andThen(new OpenGripper())
+                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
+                        .alongWith(redChargeWithEvents))
+                        .andThen(new Autobalance(BalancePoint.LEVEL)));
    autChooser.addOption("BlueLeftSide", autoCommand);
    autChooser.addOption("BlueChargingStation", autoCommand1);
    autChooser.addOption("BlueRightSide", autoCommand2);

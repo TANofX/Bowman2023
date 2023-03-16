@@ -56,8 +56,8 @@ public class FlapperIntake extends SubsystemBase {
     leftAngle.setPosition(leftAngle.getAbsolutePosition());
     rightAngle.setPosition(rightAngle.getAbsolutePosition());
 
-    leftPID = new PIDController(0.0025, 0.0, 0.0);
-    rightPID = new PIDController(0.0025, 0.0, 0.0);
+    leftPID = new PIDController(0.005, 0.0, 0.0);
+    rightPID = new PIDController(0.005, 0.0, 0.0);
 
     ShuffleboardTab tempTab = Shuffleboard.getTab("Flapper Intake");
       tempTab.addNumber("Left Angle", () -> {return leftAngle.getPosition();});
