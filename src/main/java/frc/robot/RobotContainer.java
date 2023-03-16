@@ -263,17 +263,17 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
     // Auto choice options
    autChooser.addOption("Place High", 
-                        new MoveArmToArmPosition(ArmPositions.HIGH_SCORE).raceWith(new WaitCommand(5))
+                        new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(3))
                         .andThen(new OpenGripper())
                         .andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
    autChooser.addOption("Left Blue Place High", 
-                        new MoveArmToArmPosition(ArmPositions.HIGH_SCORE).raceWith(new WaitCommand(5))
+                        new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(3))
                         .andThen(new OpenGripper())
                         .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
                         .alongWith(blueLeftWithEvents))
                         .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4))));
    autChooser.addOption("Center Red Place High", 
-                        new MoveArmToArmPosition(ArmPositions.HIGH_SCORE).raceWith(new WaitCommand(5))
+                        new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(3))
                         .andThen(new OpenGripper())
                         .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
                         .alongWith(redChargeWithEvents))

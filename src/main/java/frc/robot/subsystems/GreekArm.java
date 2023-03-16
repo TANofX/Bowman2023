@@ -429,6 +429,10 @@ public class GreekArm extends SubsystemBase {
           case SAFE_TRANSITION:
             armPath.add(ArmPositions.SAFE_TRANSITION);
             break;
+          case PRE_PRE_PICKUP:
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            break;
           case PRE_PICKUP:
             armPath.add(ArmPositions.SAFE_TRANSITION);
             armPath.add(ArmPositions.PRE_PRE_PICKUP);
@@ -567,6 +571,17 @@ public class GreekArm extends SubsystemBase {
           case MID_SCORE:
             break;
           case HIGH_SCORE:
+            break;
+        }
+        break;
+      case PRE_PRE_PICKUP:
+        switch (targetArmPosition) {
+          case HOME:
+            //armPath.add(ArmPositions.PRE_SCORING);
+            //armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            armPath.add(ArmPositions.LEAVE_SCORING);
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.HOME);
             break;
         }
         break;
