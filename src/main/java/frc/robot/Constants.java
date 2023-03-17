@@ -125,7 +125,7 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
 
     public static final Rotation2d MAX_SHOULDER_SPEED = Rotation2d.fromDegrees(152);
     public static final Rotation2d MAX_ELBOW_SPEED = Rotation2d.fromDegrees(160);
-    public static final int CANDLE_ID = 4;
+    public static final int CANDLE_ID = 30;
     public static final class DriveConstants 
     {
 
