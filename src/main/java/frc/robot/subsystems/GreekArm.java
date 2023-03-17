@@ -571,6 +571,7 @@ public class GreekArm extends SubsystemBase {
           case MID_SCORE:
             break;
           case HIGH_SCORE:
+          armPath.add(ArmPositions.HIGH_SCORE);
             break;
         }
         break;
@@ -603,6 +604,7 @@ public class GreekArm extends SubsystemBase {
           case PRE_SCORING:
             break;
           case MID_SCORE:
+            armPath.add(ArmPositions.MID_SCORE);
             break;
           case HIGH_SCORE:
             break;
