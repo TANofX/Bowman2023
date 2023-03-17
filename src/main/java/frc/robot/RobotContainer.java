@@ -261,6 +261,10 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     Command redChargeCommand = m_drivetrainSubsystem.followTrajectoryCommand(redHighCharge, true);
     Command redChargeWithEvents = new FollowPathWithEvents(redChargeCommand, redHighCharge.getMarkers(), eventMap);
 
+    PathPlannerTrajectory blueHighCharge = PathPlanner.loadPath("Blue High Charge", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+    Command blueChargeCommand = m_drivetrainSubsystem.followTrajectoryCommand(blueHighCharge, true);
+    Command blueChargeWithEvents = new FollowPathWithEvents(blueChargeCommand, blueHighCharge.getMarkers(), eventMap);
+
     // Auto choice options
    autChooser.addOption("Place High", 
                         new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(3))
@@ -277,6 +281,12 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
                         .andThen(new OpenGripper())
                         .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
                         .alongWith(redChargeWithEvents))
+                        .andThen(new Autobalance(BalancePoint.LEVEL)));
+  autChooser.addOption("Center Blue Place High", 
+                        new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(3))
+                        .andThen(new OpenGripper())
+                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
+                        .alongWith(blueChargeWithEvents))
                         .andThen(new Autobalance(BalancePoint.LEVEL)));
    autChooser.addOption("BlueLeftSide", autoCommand);
    autChooser.addOption("BlueChargingStation", autoCommand1);
