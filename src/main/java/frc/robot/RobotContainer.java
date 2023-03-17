@@ -7,6 +7,8 @@ package frc.robot;
 import frc.robot.commands.Autobalance;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DriveFollowPath;
+import frc.robot.commands.LightUpCone;
+import frc.robot.commands.LightUpCube;
 import frc.robot.commands.LowerIntake;
 import frc.robot.commands.ManualArm;
 import frc.robot.commands.MoveArmToArmPosition;
@@ -21,6 +23,7 @@ import frc.robot.commands.StopArm;
 import frc.robot.commands.ZeroYaw;
 import frc.robot.commands.Autobalance.BalancePoint;
 import frc.robot.subsystems.ArmPositions;
+import frc.robot.subsystems.CandleSubsystem;
 import frc.robot.subsystems.ConveyerBelt;
 import frc.robot.subsystems.FlapperIntake;
 
@@ -54,6 +57,7 @@ public class RobotContainer {
   public static DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   public static final FlapperIntake m_intake = new FlapperIntake();
   public static final ConveyerBelt m_conveyer = new ConveyerBelt();
+  public static final CandleSubsystem m_candle = new CandleSubsystem();
 
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -117,6 +121,9 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     m_driverController.rightTrigger().whileTrue(new RunIntake(.9));
     m_driverController.leftTrigger().whileTrue(new RunIntake(.25));
 
+    m_operatorController.povLeft().onTrue(new LightUpCone());
+    m_operatorController.povRight().onTrue(new LightUpCube());
+    
     m_driverController.leftBumper().onTrue(new RaiseIntake());
     m_driverController.rightBumper().onTrue(new LowerIntake());
 
