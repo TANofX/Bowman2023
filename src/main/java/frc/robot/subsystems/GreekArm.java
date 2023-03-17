@@ -461,10 +461,10 @@ public class GreekArm extends SubsystemBase {
             armPath.add(ArmPositions.HIGH_SCORE);
             break;
           case LEAVE_SCORING:
-          armPath.add(ArmPositions.SAFE_TRANSITION);
-          armPath.add(ArmPositions.PRE_PRE_PICKUP);
-          armPath.add(ArmPositions.LEAVE_SCORING);
-          break;
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            armPath.add(ArmPositions.LEAVE_SCORING);
+            break;
         }
         break;
       case SAFE_TRANSITION:
@@ -510,9 +510,9 @@ public class GreekArm extends SubsystemBase {
       case PICK_UP:
         switch (targetArmPosition) {
           case HOME:
-          armPath.add(ArmPositions.PRE_PICKUP);
-          armPath.add(ArmPositions.SAFE_TRANSITION);
-          armPath.add(ArmPositions.HOME);
+            armPath.add(ArmPositions.PRE_PICKUP);
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.HOME);
 
             break;
           case SAFE_TRANSITION:
@@ -555,7 +555,7 @@ public class GreekArm extends SubsystemBase {
       case MID_SCORE:
         switch (targetArmPosition) {
           case HOME:
-           // armPath.add(ArmPositions.PRE_SCORING);
+            // armPath.add(ArmPositions.PRE_SCORING);
             armPath.add(ArmPositions.LEAVE_SCORING);
             armPath.add(ArmPositions.SAFE_TRANSITION);
             armPath.add(ArmPositions.HOME);
@@ -565,21 +565,23 @@ public class GreekArm extends SubsystemBase {
           case PRE_PICKUP:
             break;
           case PICK_UP:
+            armPath.add(ArmPositions.PRE_SCORING);
+            armPath.add(ArmPositions.PICK_UP);
             break;
           case PRE_SCORING:
             break;
           case MID_SCORE:
             break;
           case HIGH_SCORE:
-          armPath.add(ArmPositions.HIGH_SCORE);
+            armPath.add(ArmPositions.HIGH_SCORE);
             break;
         }
         break;
       case PRE_PRE_PICKUP:
         switch (targetArmPosition) {
           case HOME:
-            //armPath.add(ArmPositions.PRE_SCORING);
-            //armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            // armPath.add(ArmPositions.PRE_SCORING);
+            // armPath.add(ArmPositions.PRE_PRE_PICKUP);
             armPath.add(ArmPositions.LEAVE_SCORING);
             armPath.add(ArmPositions.SAFE_TRANSITION);
             armPath.add(ArmPositions.HOME);
@@ -589,8 +591,8 @@ public class GreekArm extends SubsystemBase {
       case HIGH_SCORE:
         switch (targetArmPosition) {
           case HOME:
-            //armPath.add(ArmPositions.PRE_SCORING);
-            //armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            // armPath.add(ArmPositions.PRE_SCORING);
+            // armPath.add(ArmPositions.PRE_PRE_PICKUP);
             armPath.add(ArmPositions.LEAVE_SCORING);
             armPath.add(ArmPositions.SAFE_TRANSITION);
             armPath.add(ArmPositions.HOME);
@@ -600,6 +602,8 @@ public class GreekArm extends SubsystemBase {
           case PRE_PICKUP:
             break;
           case PICK_UP:
+            armPath.add(ArmPositions.PRE_SCORING);
+            armPath.add(ArmPositions.PICK_UP);
             break;
           case PRE_SCORING:
             break;
@@ -635,12 +639,10 @@ public class GreekArm extends SubsystemBase {
 
     }
 
-    
-      shoulderControl.set(ControlMode.PercentOutput, desiredSpeeds[0]);      
-    
-      elbowControl.set(desiredSpeeds[1]);
-    
-    
+    shoulderControl.set(ControlMode.PercentOutput, desiredSpeeds[0]);
+
+    elbowControl.set(desiredSpeeds[1]);
+
     // shoulderControl.set(ControlMode.PercentOutput, shoulderMotor);
     // elbowControl.set(elbowMotor);
 
@@ -685,14 +687,15 @@ public class GreekArm extends SubsystemBase {
     return currentElbowAngle;
   }
 
-public ArmPositions getArmPosition() {
+  public ArmPositions getArmPosition() {
     return currentArmPosition;
-}
+  }
 
-public void openGripper() {
-  gripperControl.set(Value.kForward);
-}
-public void closeGripper() {
-  gripperControl.set(Value.kReverse);
-}
+  public void openGripper() {
+    gripperControl.set(Value.kForward);
+  }
+
+  public void closeGripper() {
+    gripperControl.set(Value.kReverse);
+  }
 }
