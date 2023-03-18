@@ -566,6 +566,7 @@ public class GreekArm extends SubsystemBase {
             break;
           case PICK_UP:
             armPath.add(ArmPositions.PRE_SCORING);
+            armPath.add(ArmPositions.PRE_PICKUP);
             armPath.add(ArmPositions.PICK_UP);
             break;
           case PRE_SCORING:
@@ -603,6 +604,7 @@ public class GreekArm extends SubsystemBase {
             break;
           case PICK_UP:
             armPath.add(ArmPositions.PRE_SCORING);
+            armPath.add(ArmPositions.PRE_PICKUP);
             armPath.add(ArmPositions.PICK_UP);
             break;
           case PRE_SCORING:

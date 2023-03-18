@@ -133,7 +133,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
   m_operatorController.a().onTrue(new InstantCommand(() -> {m_conveyer.openConveyer();}).andThen(new MoveArmToArmPosition(ArmPositions.MID_SCORE)));
   m_operatorController.x().onTrue(new InstantCommand(() -> {m_conveyer.openConveyer();}).andThen(new MoveArmToArmPosition(ArmPositions.HIGH_SCORE)));
-  m_operatorController.b().onTrue(new MoveArmToArmPosition(ArmPositions.PICK_UP));
+  m_operatorController.b().onTrue((new MoveArmToArmPosition(ArmPositions.PICK_UP)).andThen(new InstantCommand(() -> {m_conveyer.closeConveyer();})));
   m_operatorController.rightBumper().onTrue(new InstantCommand(() -> {m_conveyer.closeConveyer();}).andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
 
 
