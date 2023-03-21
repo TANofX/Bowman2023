@@ -110,7 +110,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
   private SwerveDrivePoseEstimator swervePoseEstimator; 
   private boolean ignoreAprilTags = true;
+  
   public DrivetrainSubsystem() {
+        m_pigeon.setYaw(0.0);
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         tab.addNumber("Pigeon", ()->{return m_pigeon.getYaw();});
         driveEntry = tab.add("driveFraction", 1)
@@ -244,6 +246,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
         estTab.addBoolean("Targets Visisble", () -> {return (pcw.getTargets().getTargets().size() > 0);});
         estTab.add(fieldSim);
+
+        tab.addNumber("Front Left Speed", ()->{return swerveModules[0].getDriveVelocity();});
+        tab.addNumber("Front Right Speed", ()->{return swerveModules[1].getDriveVelocity();});
+        tab.addNumber("Back Left Speed", ()->{return swerveModules[2].getDriveVelocity();});
+        tab.addNumber("Back Right Speed", ()->{return swerveModules[3].getDriveVelocity();});
 }
 
   /**

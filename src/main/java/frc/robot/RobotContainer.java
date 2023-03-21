@@ -185,7 +185,9 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
                 @Override
                 public double getAsDouble() {return modifyAxis(m_operatorController.getLeftX());}
             }));
-        
+    ShuffleboardTab currentTab = Shuffleboard.getTab("Other Buttons");
+
+    currentTab.add("zeroGyro", new InstantCommand (() -> {m_drivetrainSubsystem.zeroGyroscope();}) );
     
   }
 
@@ -313,6 +315,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     tab.add("Pick Up", new MoveArmToArmPosition(ArmPositions.PICK_UP));
     tab.add("Mid Score", new MoveArmToArmPosition(ArmPositions.MID_SCORE));
     tab.add("High Score", new MoveArmToArmPosition(ArmPositions.HIGH_SCORE));
+
 
   }
   public Command getAutonomousCommand() {
