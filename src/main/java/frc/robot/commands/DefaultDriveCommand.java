@@ -10,6 +10,8 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 
 import java.util.function.DoubleSupplier;
 
+import org.opencv.core.Mat;
+
 public class DefaultDriveCommand extends CommandBase {
     private final DrivetrainSubsystem m_drivetrainSubsystem;
 
@@ -54,9 +56,12 @@ public class DefaultDriveCommand extends CommandBase {
         if (Math.abs(m_rotationSupplier.getAsDouble()) > 0.001) {
             maintainAngle.setSetpoint(m_drivetrainSubsystem.getGyroscopeRotation().getRadians());
         }
+        if ((Math.abs(m_translationXSupplier.getAsDouble() )> 0.05) || (Math.abs(m_translationYSupplier.getAsDouble()) > 0.05)) {
         chasSpeed.omegaRadiansPerSecond = chasSpeed.omegaRadiansPerSecond + maintainAngle.calculate(m_drivetrainSubsystem.getGyroscopeRotation().getRadians());
+        }
         m_drivetrainSubsystem.drive(chasSpeed);
         priorChasSpeed = chasSpeed;
+
     }
 
     @Override

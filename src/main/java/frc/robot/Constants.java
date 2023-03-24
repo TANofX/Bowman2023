@@ -176,8 +176,8 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
       }
     
       public static final class AutoConstants {
-        public static final double kMaxSpeedMetersPerSecond = 3.5;
-        public static final double kMaxAccelerationMetersPerSecondSquared = 1.5;
+        public static final double kMaxSpeedMetersPerSecond = 4.0;
+        public static final double kMaxAccelerationMetersPerSecondSquared = 2.0;
     
         
     

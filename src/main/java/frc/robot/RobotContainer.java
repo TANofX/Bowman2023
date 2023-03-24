@@ -59,6 +59,8 @@ public class RobotContainer {
   public static final ConveyerBelt m_conveyer = new ConveyerBelt();
   public static final CandleSubsystem m_candle = new CandleSubsystem();
 
+  
+  private static HashMap<String, Command> eventMap = new HashMap<String, Command>(); 
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -197,116 +199,63 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
    * @return the command to run in autonomous
    */
   private void configureAutos() {
-  
-    HashMap<String, Command> eventMap = new HashMap<String, Command>(); 
-
     eventMap.put("runIntake", new RunIntake(0.9).withTimeout(3.0));
     eventMap.put("runIntakeSlow", new RunIntake(0.25).withTimeout(2.0));
     eventMap.put("lowerIntake", new LowerIntake());
     eventMap.put("raiseIntake", new RaiseIntake());
     eventMap.put("reverseConveyer", new RunConveyer(0.75).withTimeout(0.8));
 
+    // Auto choice options
+   autChooser.addOption("Place High", 
+                        placeHigh().andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
+   autChooser.addOption("Left Blue Double High", placeHighScoreLow("Left Blue Side Double High"));
+   autChooser.addOption("Middle Red Side Charge High", placeHighBalance("Middle Red Side Charge High"));
+   autChooser.addOption("Middle Blue Side Charge High", placeHighBalance("Middle Blue Side Charge High"));
+   autChooser.addOption("Left Blue Side Double Low", doubleScoreLow("Left Blue Side Double Low"));
+   autChooser.addOption("Right Blue Side Double Low", doubleScoreLow("Right Blue Side Double Low"));
+   autChooser.addOption("Left Red Side Double Low", doubleScoreLow("Left Red Side Double Low"));
+   autChooser.addOption("Right Red Side Double Low", doubleScoreLow("Right Red Side Double Low"));
 
-    
-    // Blue autos
-    PathPlannerTrajectory traj = PathPlanner.loadPath("Left Low Double", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-    Command driveComand = m_drivetrainSubsystem.followTrajectoryCommand(traj, true);
-    Command withEvents = new FollowPathWithEvents(driveComand, traj.getMarkers(), eventMap);
+   Shuffleboard.getTab("Auto")
+   .add(autChooser);
+  }
 
-    Command autoCommand = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
-    .andThen(withEvents)
-    .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
-
-
-    PathPlannerTrajectory chargeTrajectory = PathPlanner.loadPath("Over The Rainbow", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-    Command chargerComand = m_drivetrainSubsystem.followTrajectoryCommand(chargeTrajectory, true);
-    Command chargerWithEvents = new FollowPathWithEvents(chargerComand, chargeTrajectory.getMarkers(), eventMap);
-
-    Command autoCommand1 = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
-    .andThen(chargerWithEvents)
-    .andThen(new Autobalance(BalancePoint.LEVEL));
-
-
-    PathPlannerTrajectory rightTrajectory = PathPlanner.loadPath("Right Low Double", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-    Command rightCommand = m_drivetrainSubsystem.followTrajectoryCommand(rightTrajectory, true);
-    Command rightWithEvents = new FollowPathWithEvents(rightCommand, rightTrajectory.getMarkers(), eventMap);
-
-    Command autoCommand2 = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
-    .andThen(rightWithEvents)
-    .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
-
-    // Red autos
-    PathPlannerTrajectory redTraj = PathPlanner.loadPath("Red Left Low Double", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-    Command redDriveComand = m_drivetrainSubsystem.followTrajectoryCommand(redTraj, true);
-    Command redWithEvents = new FollowPathWithEvents(redDriveComand, redTraj.getMarkers(), eventMap);
-
-    Command autoCommand3 = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
-    .andThen(redWithEvents)
-    .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
-
-
-    PathPlannerTrajectory redChargeTrajectory = PathPlanner.loadPath("Red Over The Rainbow", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-    Command redChargerComand = m_drivetrainSubsystem.followTrajectoryCommand(redChargeTrajectory, true);
-    Command redChargerWithEvents = new FollowPathWithEvents(redChargerComand, redChargeTrajectory.getMarkers(), eventMap);
-
-    Command autoCommand4 = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
-    .andThen(redChargerWithEvents)
-    .andThen(new Autobalance(BalancePoint.LEVEL));
-
-
-    PathPlannerTrajectory redRightTrajectory = PathPlanner.loadPath("Red Right Low Double", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+  private Command doubleScoreLow(String pathName) {
+    PathPlannerTrajectory redRightTrajectory = PathPlanner.loadPath(pathName, Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
     Command redRightCommand = m_drivetrainSubsystem.followTrajectoryCommand(redRightTrajectory, true);
     Command redRightWithEvents = new FollowPathWithEvents(redRightCommand, redRightTrajectory.getMarkers(), eventMap);
 
     Command autoCommand5 = new RunConveyer(-1).raceWith(new WaitCommand(1.4))
     .andThen(redRightWithEvents)
     .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
+    return autoCommand5;
+  }
 
-    PathPlannerTrajectory blueLeftTraj = PathPlanner.loadPath("Left Low Double With Arm", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+  private Command placeHighScoreLow(String pathName) {
+    PathPlannerTrajectory blueLeftTraj = PathPlanner.loadPath(pathName, Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
     Command blueLeftCommand = m_drivetrainSubsystem.followTrajectoryCommand(blueLeftTraj, true);
     Command blueLeftWithEvents = new FollowPathWithEvents(blueLeftCommand, blueLeftTraj.getMarkers(), eventMap);
+    return placeHigh()
+    .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
+    .alongWith(blueLeftWithEvents))
+    .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
+  }
 
-    PathPlannerTrajectory redHighCharge = PathPlanner.loadPath("Red High Charge", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-    Command redChargeCommand = m_drivetrainSubsystem.followTrajectoryCommand(redHighCharge, true);
-    Command redChargeWithEvents = new FollowPathWithEvents(redChargeCommand, redHighCharge.getMarkers(), eventMap);
-
-    PathPlannerTrajectory blueHighCharge = PathPlanner.loadPath("Blue High Charge", Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+  private Command placeHighBalance(String pathName) {
+    PathPlannerTrajectory blueHighCharge = PathPlanner.loadPath(pathName, Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
     Command blueChargeCommand = m_drivetrainSubsystem.followTrajectoryCommand(blueHighCharge, true);
     Command blueChargeWithEvents = new FollowPathWithEvents(blueChargeCommand, blueHighCharge.getMarkers(), eventMap);
-
-    // Auto choice options
-   autChooser.addOption("Place High", 
-                        new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(3))
-                        .andThen(new OpenGripper())
-                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
-   autChooser.addOption("Left Blue Place High", 
-                        new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(3))
-                        .andThen(new OpenGripper())
-                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
-                        .alongWith(blueLeftWithEvents))
-                        .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4))));
-   autChooser.addOption("Center Red Place High", 
-                        new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(3))
-                        .andThen(new OpenGripper())
-                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
-                        .alongWith(redChargeWithEvents))
-                        .andThen(new Autobalance(BalancePoint.LEVEL)));
-  autChooser.addOption("Center Blue Place High", 
-                        new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(3))
-                        .andThen(new OpenGripper())
-                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
-                        .alongWith(blueChargeWithEvents))
-                        .andThen(new Autobalance(BalancePoint.LEVEL)));
-   autChooser.addOption("BlueLeftSide", autoCommand);
-   autChooser.addOption("BlueChargingStation", autoCommand1);
-   autChooser.addOption("BlueRightSide", autoCommand2);
-   autChooser.addOption("RedLeftSide", autoCommand3);
-   autChooser.addOption("RedChargingStation", autoCommand4);
-   autChooser.addOption("RedRightSide", autoCommand5);
-
-   Shuffleboard.getTab("Auto")
-   .add(autChooser);
+    return placeHigh()
+    .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
+    .alongWith(blueChargeWithEvents))
+    .andThen(new Autobalance(BalancePoint.LEVEL));
   }
+
+  private Command placeHigh() {
+    return new MoveArmToArmPosition(ArmPositions.PRE_PRE_PICKUP).raceWith(new WaitCommand(2.4))
+    .andThen(new OpenGripper());
+  }
+
   private void configureShuffleBoardButtons() {
     ShuffleboardTab tab = Shuffleboard.getTab("Arm Control");
     tab.add("Home", new MoveArmToArmPosition(ArmPositions.HOME));
