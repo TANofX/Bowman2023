@@ -7,10 +7,10 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8552119546987187,
-        "y": 0.10198799023552287
+        "x": 2.5335045930755373,
+        "y": 0.6648553581467355
       },
-      "holonomicAngle": 180.0,
+      "holonomicAngle": 0.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -24,41 +24,16 @@
     },
     {
       "anchorPoint": {
-        "x": 5.696316511116435,
-        "y": 0.8833078329663774
+        "x": 5.268909495164962,
+        "y": 0.8453160982151344
       },
       "prevControl": {
-        "x": 4.940831984886348,
-        "y": 0.8489676272286467
+        "x": 4.404597529574207,
+        "y": 0.8358181645273246
       },
       "nextControl": {
-        "x": 6.593810825189033,
-        "y": 0.9241030290605865
-      },
-      "holonomicAngle": 180.0,
-      "isReversal": false,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 6.123723527067908,
-        "y": 0.8833078329663774
-      },
-      "prevControl": {
-        "x": 5.8387855164335924,
-        "y": 0.8928057666541872
-      },
-      "nextControl": {
-        "x": 6.617433189679015,
-        "y": 0.866850844212675
+        "x": 6.152215059158283,
+        "y": 0.8550227527645109
       },
       "holonomicAngle": 0,
       "isReversal": false,
@@ -87,7 +62,7 @@
         "x": 6.753608121743835,
         "y": 0.9361869141663498
       },
-      "holonomicAngle": 0,
+      "holonomicAngle": 0.0,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
@@ -103,43 +78,18 @@
     },
     {
       "anchorPoint": {
-        "x": 6.71259541571216,
-        "y": 0.9212995677176191
+        "x": 4.005684314686165,
+        "y": 0.9023037003419971
       },
       "prevControl": {
-        "x": 7.396446641234516,
-        "y": 0.9023037003419986
+        "x": 4.547066534891363,
+        "y": 0.8928057666541872
       },
       "nextControl": {
-        "x": 5.634086292886406,
-        "y": 0.9512581544627773
+        "x": 3.1633165910385714,
+        "y": 0.9170820814586207
       },
-      "holonomicAngle": -180.0,
-      "isReversal": false,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 3.5992065877261528,
-        "y": 0.7955063238370763
-      },
-      "prevControl": {
-        "x": 4.103234501155255,
-        "y": 0.7340395051262107
-      },
-      "nextControl": {
-        "x": 2.7629050677948683,
-        "y": 0.8974943140725976
-      },
-      "holonomicAngle": 180.0,
+      "holonomicAngle": 0.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -161,7 +111,7 @@
         "y": 1.0867944160909144
       },
       "nextControl": null,
-      "holonomicAngle": 180.0,
+      "holonomicAngle": 0.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -174,38 +124,35 @@
       }
     }
   ],
-  "maxVelocity": 4.0,
-  "maxAcceleration": 2.0,
-  "isReversed": null,
   "markers": [
     {
-      "position": 0.0,
-      "names": [
-        "event"
-      ]
-    },
-    {
-      "position": 1.0545454545453883,
+      "position": 1.3333333333332942,
       "names": [
         "lowerIntake"
       ]
     },
     {
-      "position": 2.6181818181818053,
+      "position": 1.8666666666665885,
       "names": [
-        "runIntake"
+        "runIntakeSlow"
       ]
     },
     {
-      "position": 2.981818181818211,
+      "position": 2.012121212121134,
       "names": [
         "raiseIntake"
       ]
     },
     {
-      "position": 4.3999999999999915,
+      "position": 1.8424242424242494,
       "names": [
-        "reverseConveyer"
+        "runConveyer"
+      ]
+    },
+    {
+      "position": 3.0060606060605863,
+      "names": [
+        "runConveyer"
       ]
     }
   ]

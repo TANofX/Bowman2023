@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.commands.Autobalance;
+import frc.robot.commands.CloseGripper;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DriveFollowPath;
 import frc.robot.commands.LightUpCone;
@@ -163,18 +164,18 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
             new DoubleSupplier() {
               @Override
                   public double getAsDouble() {
-                      return -modifyAxis(m_driverController.getLeftY()) * Constants.DRIVE_SPEED_PERCENTAGE * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
+                      return -modifyAxis(m_driverController.getLeftY());
                   }
             },
             new DoubleSupplier() {
               @Override
               public double getAsDouble() {
-                  return -modifyAxis(m_driverController.getLeftX()) *  Constants.DRIVE_SPEED_PERCENTAGE  * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
+                  return -modifyAxis(m_driverController.getLeftX());
               }
             },
             new DoubleSupplier() {
               public double getAsDouble() {
-                return -modifyAxis(m_driverController.getRightX()) *  Constants.DRIVE_SPEED_PERCENTAGE  * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+                return -modifyAxis(m_driverController.getRightX());
               }
             }));
 
@@ -215,7 +216,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
    autChooser.addOption("Right Blue Side Double Low", doubleScoreLow("Right Blue Side Double Low"));
    autChooser.addOption("Left Red Side Double Low", doubleScoreLow("Left Red Side Double Low"));
    autChooser.addOption("Right Red Side Double Low", doubleScoreLow("Right Red Side Double Low"));
-
+   autChooser.addOption("Right Blue Double High", placeHighBeforeAndAfter("Right Blue  Double High"));
    Shuffleboard.getTab("Auto")
    .add(autChooser);
   }
@@ -239,6 +240,18 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
     .alongWith(blueLeftWithEvents))
     .andThen(new RunConveyer(-1).raceWith(new WaitCommand(1.4)));
+  }
+
+  private Command placeHighBeforeAndAfter(String pathName) {
+    PathPlannerTrajectory currentTrajectory = PathPlanner.loadPath(pathName, Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+    Command followCommand = m_drivetrainSubsystem.followTrajectoryCommand(currentTrajectory, true);
+    Command followWithEvents = new FollowPathWithEvents(followCommand, currentTrajectory.getMarkers(), eventMap);
+    return placeHigh()
+    .andThen((new MoveArmToArmPosition(ArmPositions.PICK_UP).andThen(new InstantCommand(() -> {m_conveyer.closeConveyer();})))
+    .alongWith(followWithEvents))
+    .andThen(new CloseGripper())
+    .andThen(new InstantCommand(() -> {m_conveyer.openConveyer();}).andThen(new WaitCommand(0.125)))
+    .andThen(placeHigh());
   }
 
   private Command placeHighBalance(String pathName) {
@@ -274,11 +287,12 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
   public static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
-      if (value > 0.0) {
-        return (value - deadband) / (1.0 - deadband);
-      } else {
-        return (value + deadband) / (1.0 - deadband);
-      }
+      // if (value > 0.0) {
+      //   return (value - deadband) / (1.0 - deadband);
+      // } else {
+      //   return (value + deadband) / (1.0 - deadband);
+      // }
+      return value;
     } else {
       return 0.0;
     }

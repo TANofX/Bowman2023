@@ -44,7 +44,7 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
      *
      * Should be measured from center to center.
      */
-    static final double DRIVE_SPEED_PERCENTAGE = .90;
+    public static final double DRIVE_SPEED_PERCENTAGE = .90;
 
     public static final double DRIVETRAIN_WHEELBASE_METERS = .6985; // .6985; // FIXME Measure and set wheelbase
 

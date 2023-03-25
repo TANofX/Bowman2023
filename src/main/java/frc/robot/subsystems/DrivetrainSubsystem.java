@@ -26,6 +26,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -394,6 +395,15 @@ public void resetGyroscope(double d) {
              (Command)new InstantCommand(() -> {
                // Reset odometry for the first path you run during auto
                if(isFirstPath){
+                   double startYaw = traj.getInitialHolonomicPose().getRotation().getDegrees();
+                   switch (DriverStation.getAlliance()) {
+                        case Red:
+                                startYaw += 180;
+                                break;
+                        default:
+                                break;
+                   }
+                   this.resetGyroscope(startYaw);
                    this.resetOdometry(traj.getInitialHolonomicPose());
                }
              }),
