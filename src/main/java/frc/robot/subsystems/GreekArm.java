@@ -111,6 +111,7 @@ public class GreekArm extends SubsystemBase {
   private Rotation2d targetElbowPosition = new Rotation2d();
 
   private ArmPositions currentArmPosition = ArmPositions.UNKNOWN;
+  private String lastArmTransition = "N/A";
 
   /** Creates a new GreekArm. */
   public GreekArm() {
@@ -196,6 +197,9 @@ public class GreekArm extends SubsystemBase {
     });
     armTab.addString("Arm Position", () -> {
       return currentArmPosition.name();
+    });
+    armTab.addString("Arm Transition", () -> {
+      return lastArmTransition;
     });
 
     controlState = ControlState.SPEED_CONTROL;
@@ -420,7 +424,12 @@ public class GreekArm extends SubsystemBase {
   }
 
   public LinkedList<ArmPositions> getPath(ArmPositions targetArmPosition) {
+    if (currentArmPosition == ArmPositions.UNKNOWN) {
+      updateState();
+    }
+    lastArmTransition = currentArmPosition.name() + " -> " + targetArmPosition.name();
     LinkedList<ArmPositions> armPath = new LinkedList<ArmPositions>();
+    //armPath.add(currentArmPosition);
     switch (currentArmPosition) {
       case HOME:
         switch (targetArmPosition) {
@@ -513,7 +522,6 @@ public class GreekArm extends SubsystemBase {
             armPath.add(ArmPositions.PRE_PICKUP);
             armPath.add(ArmPositions.SAFE_TRANSITION);
             armPath.add(ArmPositions.HOME);
-
             break;
           case SAFE_TRANSITION:
             break;
@@ -586,6 +594,11 @@ public class GreekArm extends SubsystemBase {
             armPath.add(ArmPositions.LEAVE_SCORING);
             armPath.add(ArmPositions.SAFE_TRANSITION);
             armPath.add(ArmPositions.HOME);
+            break;
+          case PICK_UP:
+            armPath.add(ArmPositions.PRE_SCORING);
+            armPath.add(ArmPositions.PRE_PICKUP);
+            armPath.add(ArmPositions.PICK_UP);
             break;
         }
         break;

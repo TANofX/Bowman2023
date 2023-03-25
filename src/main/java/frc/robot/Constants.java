@@ -80,7 +80,7 @@ public static final int ELBOW_ENCODER_CAN_ID = 41;
     public static final int JOYSTICK_PORT = 1;
 
     // Auto Drives PID
-    public static final double DRIVE_POS_ERROR_CONTROLLER_P = 0.2;
+    public static final double DRIVE_POS_ERROR_CONTROLLER_P = 0.7;
     public static final double DRIVE_POS_ERROR_CONTROLLER_I = 0;
     public static final double DRIVE_POS_ERROR_CONTROLLER_D = 0;
     public static final double DRIVE_POS_ERROR_CONTROLLER_F = 0;

@@ -206,17 +206,26 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     eventMap.put("raiseIntake", new RaiseIntake());
     eventMap.put("reverseConveyer", new RunConveyer(0.75).withTimeout(0.8));
 
-    // Auto choice options
+    // Auto Choice Options
    autChooser.addOption("Place High", 
                         placeHigh().andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
-   autChooser.addOption("Left Blue Double High", placeHighScoreLow("Left Blue Side Double High"));
-   autChooser.addOption("Middle Red Side Charge High", placeHighBalance("Middle Red Side Charge High"));
-   autChooser.addOption("Middle Blue Side Charge High", placeHighBalance("Middle Blue Side Charge High"));
-   autChooser.addOption("Left Blue Side Double Low", doubleScoreLow("Left Blue Side Double Low"));
-   autChooser.addOption("Right Blue Side Double Low", doubleScoreLow("Right Blue Side Double Low"));
-   autChooser.addOption("Left Red Side Double Low", doubleScoreLow("Left Red Side Double Low"));
-   autChooser.addOption("Right Red Side Double Low", doubleScoreLow("Right Red Side Double Low"));
-   autChooser.addOption("Right Blue Double High", placeHighBeforeAndAfter("Right Blue  Double High"));
+    //BLUE AUTOS
+   autChooser.addOption("Left Blue Double High", placeHighBeforeAndAfter("Left Blue Double High"));
+   autChooser.addOption("Left Blue Double Low", doubleScoreLow("Left Blue Double Low"));
+   autChooser.addOption("Left Blue Charge High", placeHighBalance("Left Blue Charge High"));
+   autChooser.addOption("Middle Blue Charge High", placeHighBalance("Middle Blue Charge High"));
+   autChooser.addOption("Right Blue Double High", placeHighBeforeAndAfter("Right Blue Double High"));
+   autChooser.addOption("Right Blue Double Low", doubleScoreLow("Right Blue Double Low"));
+   autChooser.addOption("Right Blue Charge High", placeHighBalance("Right Blue Charge High"));
+    //RED AUTOS
+   autChooser.addOption("Left Red Double High", placeHighBeforeAndAfter("Left Red Double High"));
+   autChooser.addOption("Left Red Double Low", doubleScoreLow("Left Red Double Low"));
+   autChooser.addOption("Left Red Charge High", placeHighBalance("Left Red Charge High"));
+   autChooser.addOption("Middle Red Charge High", placeHighBalance("Middle Red Charge High"));
+   autChooser.addOption("Right Red Double High", placeHighBeforeAndAfter("Right Red Double High"));
+   autChooser.addOption("Right Red Double Low", doubleScoreLow("Right Red Double Low"));
+   autChooser.addOption("Right Red Charge High", placeHighBalance("Right Red Charge High"));
+   
    Shuffleboard.getTab("Auto")
    .add(autChooser);
   }
@@ -247,11 +256,15 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     Command followCommand = m_drivetrainSubsystem.followTrajectoryCommand(currentTrajectory, true);
     Command followWithEvents = new FollowPathWithEvents(followCommand, currentTrajectory.getMarkers(), eventMap);
     return placeHigh()
+    .andThen(new InstantCommand(() -> {m_conveyer.openConveyer();}))
     .andThen((new MoveArmToArmPosition(ArmPositions.PICK_UP).andThen(new InstantCommand(() -> {m_conveyer.closeConveyer();})))
-    .alongWith(followWithEvents))
+    .alongWith(followWithEvents)
+    )
     .andThen(new CloseGripper())
     .andThen(new InstantCommand(() -> {m_conveyer.openConveyer();}).andThen(new WaitCommand(0.125)))
-    .andThen(placeHigh());
+    .andThen(new MoveArmToArmPosition(ArmPositions.HIGH_SCORE).raceWith(new WaitCommand(2.4))
+    .andThen(new OpenGripper()))
+    .andThen(new MoveArmToArmPosition(ArmPositions.HOME));
   }
 
   private Command placeHighBalance(String pathName) {

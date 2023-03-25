@@ -10,20 +10,25 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public enum ArmPositions {
     HOME(250, -160),
     SAFE_TRANSITION(172.5, -90),
-    PRE_PRE_PICKUP(172.5, 0),
+    PRE_PRE_PICKUP(172.5, 0, 3.5),
     PRE_PICKUP(90, 140),
     PICK_UP(190, 115), 
     PRE_SCORING(100, 100),
-    MID_SCORE(118.5, 97),
+    MID_SCORE(118.5, 97, 3.0),
     LEAVE_SCORING(150, -10),
-    HIGH_SCORE(150, 20),
+    HIGH_SCORE(150, 20, 3.5),
     UNKNOWN(251.5, -164.3);
-    private static final double POSITION_TOLERANCE = 15;
+    private static final double POSITION_TOLERANCE = 15.0;
     public Rotation2d shoulderRotation;
     public Rotation2d elbowRotation;
+    public Rotation2d rotationTolerance;
     ArmPositions(double shoulderAngle, double elbowAngle) {
+        this(shoulderAngle, elbowAngle, 2.5);
+    }
+    ArmPositions(double shoulderAngle, double elbowAngle, double tolerance) {
         shoulderRotation = Rotation2d.fromDegrees(shoulderAngle);
         elbowRotation = Rotation2d.fromDegrees(elbowAngle);
+        rotationTolerance = Rotation2d.fromDegrees(tolerance);
     }
     public static ArmPositions getPosition(Rotation2d shoulderAngle, Rotation2d elbowAngle) {
         for (ArmPositions current: values()) {

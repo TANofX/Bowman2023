@@ -396,13 +396,13 @@ public void resetGyroscope(double d) {
                // Reset odometry for the first path you run during auto
                if(isFirstPath){
                    double startYaw = traj.getInitialHolonomicPose().getRotation().getDegrees();
-                   switch (DriverStation.getAlliance()) {
-                        case Red:
-                                startYaw += 180;
-                                break;
-                        default:
-                                break;
-                   }
+                //    switch (DriverStation.getAlliance()) {
+                //         case Red:
+                //                 startYaw += 180;
+                //                 break;
+                //         default:
+                //                 break;
+                //      }
                    this.resetGyroscope(startYaw);
                    this.resetOdometry(traj.getInitialHolonomicPose());
                }
