@@ -207,8 +207,8 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     eventMap.put("reverseConveyer", new RunConveyer(0.75).withTimeout(0.8));
 
     // Auto Choice Options
-   autChooser.addOption("Place High", 
-                        placeHigh().andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
+   autChooser.addOption("Place High", new ZeroYaw().andThen(placeHigh())
+                        .andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
     //BLUE AUTOS
    autChooser.addOption("Left Blue Double High", placeHighBeforeAndAfter("Left Blue Double High"));
    autChooser.addOption("Left Blue Double Low", doubleScoreLow("Left Blue Double Low"));
