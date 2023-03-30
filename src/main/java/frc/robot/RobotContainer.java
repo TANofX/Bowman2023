@@ -26,7 +26,7 @@ import frc.robot.commands.Autobalance.BalancePoint;
 import frc.robot.subsystems.ArmPositions;
 import frc.robot.subsystems.CandleSubsystem;
 import frc.robot.subsystems.ConveyerBelt;
-import frc.robot.subsystems.FlapperIntake;
+import frc.robot.subsystems.EverybotIntake;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +56,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
-  public static final FlapperIntake m_intake = new FlapperIntake();
+  public static final EverybotIntake m_intake = new EverybotIntake();
   public static final ConveyerBelt m_conveyer = new ConveyerBelt();
   public static final CandleSubsystem m_candle = new CandleSubsystem();
 
@@ -121,8 +121,9 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     // m_driverController.y().onTrue(new Autobalance(Autobalance.BalancePoint.FORWARD));
     // m_driverController.start().onTrue(new DriveFollowPath("P1 2 (place, out, take, back, place)", 2.0, 0.5, true));
 
-    m_driverController.rightTrigger().whileTrue(new RunIntake(.9));
-    m_driverController.leftTrigger().whileTrue(new RunIntake(.25));
+    m_driverController.rightTrigger().whileTrue(new RunIntake(.75));
+    m_driverController.button(7).whileTrue(new RunIntake(.5));
+    m_driverController.leftTrigger().whileTrue(new RunIntake(-.9).alongWith(new RunConveyer()));
 
     m_operatorController.povLeft().onTrue(new LightUpCone());
     m_operatorController.povRight().onTrue(new LightUpCube());
