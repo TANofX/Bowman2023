@@ -395,7 +395,7 @@ public void resetGyroscope(double d) {
              (Command)new InstantCommand(() -> {
                // Reset odometry for the first path you run during auto
                if(isFirstPath){
-                   double startYaw = traj.getInitialHolonomicPose().getRotation().getDegrees();
+                   double startYaw = 0.0;//traj.getInitialHolonomicPose().getRotation().getDegrees();
                 //    switch (DriverStation.getAlliance()) {
                 //         case Red:
                 //                 startYaw += 180;

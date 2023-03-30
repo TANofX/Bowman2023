@@ -58,15 +58,15 @@ public class DefaultDriveCommand extends CommandBase {
         double xValue = m_translationXSupplier.getAsDouble()  * Constants.DRIVE_SPEED_PERCENTAGE * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
         double yValue = m_translationYSupplier.getAsDouble()  * Constants.DRIVE_SPEED_PERCENTAGE * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
         double omegaValue = m_rotationSupplier.getAsDouble()  *  Constants.DRIVE_SPEED_PERCENTAGE  * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
-        switch (DriverStation.getAlliance()) {
-                    case Red:
-                            xValue *= -1;
-                            yValue *= -1;
+        // switch (DriverStation.getAlliance()) {
+        //             case Red:
+        //                     xValue *= -1;
+        //                     yValue *= -1;
 
-                            break;
-                    default:
-                            break;
-                 }
+        //                     break;
+        //             default:
+        //                     break;
+        //          }
         // double driveFraction = m_drivetrainSubsystem.getdriveFraction();
         // double rotationFraction = m_drivetrainSubsystem.getrotationFraction();
         // chasSpeed = new ChassisSpeeds(driveFraction * m_translationXSupplier.getAsDouble() + (1 - driveFraction) * priorChasSpeed.vxMetersPerSecond

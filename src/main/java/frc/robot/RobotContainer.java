@@ -201,7 +201,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
    * @return the command to run in autonomous
    */
   private void configureAutos() {
-    eventMap.put("runIntake", new RunIntake(0.9).withTimeout(3.0));
+    eventMap.put("runIntake", new RunIntake(0.5).withTimeout(3.0));
     eventMap.put("runIntakeSlow", new RunIntake(0.25).withTimeout(2.0));
     eventMap.put("lowerIntake", new LowerIntake());
     eventMap.put("raiseIntake", new RaiseIntake());
