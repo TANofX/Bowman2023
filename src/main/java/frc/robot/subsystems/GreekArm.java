@@ -154,53 +154,53 @@ public class GreekArm extends SubsystemBase {
     shoulderAngle.getVelocity();
     shoulderAngle.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
 
-    ShuffleboardTab armTab = Shuffleboard.getTab("Greek Arm");
-    armTab.addNumber("shoulderVelocity", () -> {
-      return shoulderAngle.getVelocity();
-    });
-    armTab.addNumber("elbowVelocity", () -> {
-      return elbowAngle.getVelocity();
-    });
+    // ShuffleboardTab armTab = Shuffleboard.getTab("Greek Arm");
+    // armTab.addNumber("shoulderVelocity", () -> {
+    //   return shoulderAngle.getVelocity();
+    // });
+    // armTab.addNumber("elbowVelocity", () -> {
+    //   return elbowAngle.getVelocity();
+    // });
 
-    armTab.addNumber("Hand X", () -> {
-      return currentHandPosition.getX();
-    });
-    armTab.addNumber("Hand Z", () -> {
-      return currentHandPosition.getZ();
-    });
-    armTab.add("Gripper State", gripperControl);
+    // armTab.addNumber("Hand X", () -> {
+    //   return currentHandPosition.getX();
+    // });
+    // armTab.addNumber("Hand Z", () -> {
+    //   return currentHandPosition.getZ();
+    // });
+    // armTab.add("Gripper State", gripperControl);
 
-    armTab.addNumber("Elbow Angle", () -> {
-      return currentElbowAngle.getDegrees();
-    });
-    armTab.addNumber("Elbow Absolute Angle", () -> {
-      return normalizeElbowAngle(elbowAngle.getAbsolutePosition());
-    });
+    // armTab.addNumber("Elbow Angle", () -> {
+    //   return currentElbowAngle.getDegrees();
+    // });
+    // armTab.addNumber("Elbow Absolute Angle", () -> {
+    //   return normalizeElbowAngle(elbowAngle.getAbsolutePosition());
+    // });
 
-    armTab.addNumber("Shoulder Angle", () -> {
-      return currentShoulderAngle.getDegrees();
-    });
-    armTab.addNumber("Shoulder Absolute Angle", () -> {
-      return normalizeShoulderAngle(shoulderAngle.getAbsolutePosition());
-    });
-    armTab.addNumber("Shoulder Target Speed", () -> {
-      return targetShoulderSpeed.getDegrees();
-    });
-    armTab.addNumber("Elbow Target Speed", () -> {
-      return targetElbowSpeed.getDegrees();
-    });
-    armTab.addNumber("Target Shoulder Angle", () -> {
-      return targetShoulderPosition.getDegrees();
-    });
-    armTab.addNumber("Target Elbow Angle", () -> {
-      return targetElbowPosition.getDegrees();
-    });
-    armTab.addString("Arm Position", () -> {
-      return currentArmPosition.name();
-    });
-    armTab.addString("Arm Transition", () -> {
-      return lastArmTransition;
-    });
+    // armTab.addNumber("Shoulder Angle", () -> {
+    //   return currentShoulderAngle.getDegrees();
+    // });
+    // armTab.addNumber("Shoulder Absolute Angle", () -> {
+    //   return normalizeShoulderAngle(shoulderAngle.getAbsolutePosition());
+    // });
+    // armTab.addNumber("Shoulder Target Speed", () -> {
+    //   return targetShoulderSpeed.getDegrees();
+    // });
+    // armTab.addNumber("Elbow Target Speed", () -> {
+    //   return targetElbowSpeed.getDegrees();
+    // });
+    // armTab.addNumber("Target Shoulder Angle", () -> {
+    //   return targetShoulderPosition.getDegrees();
+    // });
+    // armTab.addNumber("Target Elbow Angle", () -> {
+    //   return targetElbowPosition.getDegrees();
+    // });
+    // armTab.addString("Arm Position", () -> {
+    //   return currentArmPosition.name();
+    // });
+    // armTab.addString("Arm Transition", () -> {
+    //   return lastArmTransition;
+    // });
 
     controlState = ControlState.SPEED_CONTROL;
   }

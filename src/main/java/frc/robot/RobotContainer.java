@@ -123,7 +123,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
     m_driverController.rightTrigger().whileTrue(new RunIntake(.75));
     m_driverController.button(7).whileTrue(new RunIntake(.5));
-    m_driverController.leftTrigger().whileTrue(new RunIntake(-.9).alongWith(new RunConveyer()));
+    m_driverController.leftTrigger().whileTrue(new OpenGripper());
 
     m_operatorController.povLeft().onTrue(new LightUpCone());
     m_operatorController.povRight().onTrue(new LightUpCube());

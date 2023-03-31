@@ -114,25 +114,25 @@ public class DrivetrainSubsystem extends SubsystemBase {
   
   public DrivetrainSubsystem() {
         m_pigeon.setYaw(0.0);
-    ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
-        tab.addNumber("Pigeon", ()->{return m_pigeon.getYaw();});
-        driveEntry = tab.add("driveFraction", 1)
-                        .withWidget(BuiltInWidgets.kNumberSlider)
-                        .withProperties(Map.of("min", 0.1, "max", 1))
-                        .getEntry();
-        rotationEntry = tab.add("rotationFraction", 1)
-                           .withWidget(BuiltInWidgets.kNumberSlider)
-                           .withProperties(Map.of("min", 0.1, "max", 1))
-                           .getEntry();
+     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
+//         tab.addNumber("Pigeon", ()->{return m_pigeon.getYaw();});
+//         driveEntry = tab.add("driveFraction", 1)
+//                         .withWidget(BuiltInWidgets.kNumberSlider)
+//                         .withProperties(Map.of("min", 0.1, "max", 1))
+//                         .getEntry();
+//         rotationEntry = tab.add("rotationFraction", 1)
+//                            .withWidget(BuiltInWidgets.kNumberSlider)
+//                            .withProperties(Map.of("min", 0.1, "max", 1))
+//                            .getEntry();
 
 
         
 
-        pcw = new PhotonCameraWrapper();
+//         pcw = new PhotonCameraWrapper();
        
 
-        tab.addNumber("Reported Yaw", () -> {return getGyroscopeRotation().getDegrees();});
-        tab.addNumber("max velocity", () -> {return MAX_VELOCITY_METERS_PER_SECOND;} );
+//         tab.addNumber("Reported Yaw", () -> {return getGyroscopeRotation().getDegrees();});
+//         tab.addNumber("max velocity", () -> {return MAX_VELOCITY_METERS_PER_SECOND;} );
 
         m_frontLeftModule = new MkSwerveModuleBuilder (MkModuleConfiguration.getDefaultSteerFalcon500())
                 .withLayout(tab.getLayout("Front Left Module", BuiltInLayouts.kList)
@@ -178,10 +178,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
                         .withSteerOffset(BACK_RIGHT_MODULE_STEER_OFFSET)
                         .build();     
 
-        tab.addNumber("BL Absolute", ()->{return ((WPI_CANCoder)m_backLeftModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
-        tab.addNumber("FL Absolute", ()->{return ((WPI_CANCoder)m_frontLeftModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
-        tab.addNumber("BR Absolute", ()->{return ((WPI_CANCoder)m_backRightModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
-        tab.addNumber("FR Absolute", ()->{return ((WPI_CANCoder)m_frontRightModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
+        // tab.addNumber("BL Absolute", ()->{return ((WPI_CANCoder)m_backLeftModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
+        // tab.addNumber("FL Absolute", ()->{return ((WPI_CANCoder)m_frontLeftModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
+        // tab.addNumber("BR Absolute", ()->{return ((WPI_CANCoder)m_backRightModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
+        // tab.addNumber("FR Absolute", ()->{return ((WPI_CANCoder)m_frontRightModule.getSteerEncoder().getInternal()).getAbsolutePosition();});
 //     m_frontLeftModule = Mk3SwerveModuleHelper.createFalcon500(
 //             // This parameter is optional, but will allow you to see the current state of the module on the dashboard.
 //             tab.getLayout("Front Left Module", BuiltInLayouts.kList)
@@ -240,18 +240,18 @@ public class DrivetrainSubsystem extends SubsystemBase {
         swerveModules[3] = m_backRightModule;
 
         swervePoseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getAngleRotation2d(), getModulePositions(), new Pose2d());
-        ShuffleboardTab estTab = Shuffleboard.getTab("Estimated Robot Position");
-        estTab.addNumber("X", () -> {return swervePoseEstimator.getEstimatedPosition().getX();});
-        estTab.addNumber("Y", () -> {return swervePoseEstimator.getEstimatedPosition().getY();});
-        estTab.addNumber("Heading", () -> {return swervePoseEstimator.getEstimatedPosition().getRotation().getDegrees();});
+        // ShuffleboardTab estTab = Shuffleboard.getTab("Estimated Robot Position");
+        // estTab.addNumber("X", () -> {return swervePoseEstimator.getEstimatedPosition().getX();});
+        // estTab.addNumber("Y", () -> {return swervePoseEstimator.getEstimatedPosition().getY();});
+        // estTab.addNumber("Heading", () -> {return swervePoseEstimator.getEstimatedPosition().getRotation().getDegrees();});
 
-        estTab.addBoolean("Targets Visisble", () -> {return (pcw.getTargets().getTargets().size() > 0);});
-        estTab.add(fieldSim);
+        // estTab.addBoolean("Targets Visisble", () -> {return (pcw.getTargets().getTargets().size() > 0);});
+        // estTab.add(fieldSim);
 
-        tab.addNumber("Front Left Speed", ()->{return swerveModules[0].getDriveVelocity();});
-        tab.addNumber("Front Right Speed", ()->{return swerveModules[1].getDriveVelocity();});
-        tab.addNumber("Back Left Speed", ()->{return swerveModules[2].getDriveVelocity();});
-        tab.addNumber("Back Right Speed", ()->{return swerveModules[3].getDriveVelocity();});
+        // tab.addNumber("Front Left Speed", ()->{return swerveModules[0].getDriveVelocity();});
+        // tab.addNumber("Front Right Speed", ()->{return swerveModules[1].getDriveVelocity();});
+        // tab.addNumber("Back Left Speed", ()->{return swerveModules[2].getDriveVelocity();});
+        // tab.addNumber("Back Right Speed", ()->{return swerveModules[3].getDriveVelocity();});
 }
 
   /**
@@ -305,19 +305,19 @@ public class DrivetrainSubsystem extends SubsystemBase {
         // Also apply vision measurements. We use 0.3 seconds in the past as an example
         // -- o
         // a real robot, this must be calculated based either on latency or timestamps.
-        Optional<EstimatedRobotPose> result = pcw.getEstimatedGlobalPose(swervePoseEstimator.getEstimatedPosition());
+//         Optional<EstimatedRobotPose> result = pcw.getEstimatedGlobalPose(swervePoseEstimator.getEstimatedPosition());
 
-        if (result.isPresent() && !ignoreAprilTags) {
-                EstimatedRobotPose camPose = result.get();
-                swervePoseEstimator.addVisionMeasurement(
-                camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
-                fieldSim.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
-        } else {
-                // move it way off the screen to make it disappear
-                fieldSim.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
-        }
+//        if (result.isPresent() && !ignoreAprilTags) {
+//                 EstimatedRobotPose camPose = result.get();
+//                 swervePoseEstimator.addVisionMeasurement(
+//                 camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+//                 // fieldSim.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
+//         } else {
+//                 // move it way off the screen to make it disappear
+//                 // fieldSim.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
+//         }
 
-        fieldSim.setRobotPose(swervePoseEstimator.getEstimatedPosition());
+        // fieldSim.setRobotPose(swervePoseEstimator.getEstimatedPosition());
 }
 public void useAprilTags(boolean b) {
         ignoreAprilTags = !b;
