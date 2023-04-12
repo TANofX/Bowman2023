@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.EventMarker;
@@ -123,7 +124,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
     m_driverController.rightTrigger().whileTrue(new RunIntake(.75));
     m_driverController.button(7).whileTrue(new RunIntake(.5));
-    m_driverController.leftTrigger().whileTrue(new OpenGripper());
+    m_driverController.leftTrigger().onTrue(new WaitCommand(1).alongWith(new MoveArmToArmPosition(ArmPositions.SLAM_JAM)).andThen(new OpenGripper()));
 
     m_operatorController.povLeft().onTrue(new LightUpCone());
     m_operatorController.povRight().onTrue(new LightUpCube());
@@ -206,26 +207,28 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     eventMap.put("lowerIntake", new LowerIntake());
     eventMap.put("raiseIntake", new RaiseIntake());
     eventMap.put("reverseConveyer", new RunConveyer(0.75).withTimeout(0.8));
+    eventMap.put("runConveyer", new RunConveyer(0.75).withTimeout(3.0));
 
     // Auto Choice Options
    autChooser.addOption("Place High", new ZeroYaw().andThen(placeHigh())
                         .andThen(new MoveArmToArmPosition(ArmPositions.HOME)));
+   autChooser.addOption("Middle Charge High", placeHighBalance("Middle Red Charge High"));
+
     //BLUE AUTOS
    autChooser.addOption("Left Blue Double High", placeHighBeforeAndAfter("Left Blue Double High"));
-   autChooser.addOption("Left Blue Double Low", doubleScoreLow("Left Blue Double Low"));
-   autChooser.addOption("Left Blue Charge High", placeHighBalance("Left Blue Charge High"));
-   autChooser.addOption("Middle Blue Charge High", placeHighBalance("Middle Blue Charge High"));
+   //autChooser.addOption("Left Blue Double Low", doubleScoreLow("Left Blue Double Low"));
+ //  autChooser.addOption("Left Blue Charge High", placeHighBalance("Left Blue Charge High"));
+   //autChooser.addOption("Middle Blue Charge High", placeHighBalance("Middle Blue Charge High"));
    autChooser.addOption("Right Blue Double High", placeHighBeforeAndAfter("Right Blue Double High"));
-   autChooser.addOption("Right Blue Double Low", doubleScoreLow("Right Blue Double Low"));
-   autChooser.addOption("Right Blue Charge High", placeHighBalance("Right Blue Charge High"));
+   //autChooser.addOption("Right Blue Double Low", doubleScoreLow("Right Blue Double Low"));
+   //autChooser.addOption("Right Blue Charge High", placeHighBalance("Right Blue Charge High"));
     //RED AUTOS
    autChooser.addOption("Left Red Double High", placeHighBeforeAndAfter("Left Red Double High"));
-   autChooser.addOption("Left Red Double Low", doubleScoreLow("Left Red Double Low"));
-   autChooser.addOption("Left Red Charge High", placeHighBalance("Left Red Charge High"));
-   autChooser.addOption("Middle Red Charge High", placeHighBalance("Middle Red Charge High"));
+   //autChooser.addOption("Left Red Double Low", doubleScoreLow("Left Red Double Low"));
+   //autChooser.addOption("Left Red Charge High", placeHighBalance("Left Red Charge High"));
    autChooser.addOption("Right Red Double High", placeHighBeforeAndAfter("Right Red Double High"));
-   autChooser.addOption("Right Red Double Low", doubleScoreLow("Right Red Double Low"));
-   autChooser.addOption("Right Red Charge High", placeHighBalance("Right Red Charge High"));
+   //autChooser.addOption("Right Red Double Low", doubleScoreLow("Right Red Double Low"));
+   //autChooser.addOption("Right Red Charge High", placeHighBalance("Right Red Charge High"));
    
    Shuffleboard.getTab("Auto")
    .add(autChooser);
@@ -269,12 +272,25 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
   }
 
   private Command placeHighBalance(String pathName) {
-    PathPlannerTrajectory blueHighCharge = PathPlanner.loadPath(pathName, Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-    Command blueChargeCommand = m_drivetrainSubsystem.followTrajectoryCommand(blueHighCharge, true);
-    Command blueChargeWithEvents = new FollowPathWithEvents(blueChargeCommand, blueHighCharge.getMarkers(), eventMap);
+    List<PathPlannerTrajectory> blueHighCharge = PathPlanner.loadPathGroup(pathName, new PathConstraints(Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared));
+    Command driveCommand = null;
+    
+    for (PathPlannerTrajectory p : blueHighCharge) {
+    Command blueChargeCommand = m_drivetrainSubsystem.followTrajectoryCommand(p, driveCommand == null);
+    Command blueChargeWithEvents = new FollowPathWithEvents(blueChargeCommand, p.getMarkers(), eventMap);
+    if (driveCommand == null) {
+      driveCommand = new WaitCommand(2)
+      .andThen(blueChargeWithEvents);
+    }
+    else {
+      driveCommand = driveCommand
+      .andThen(new WaitCommand(0.75)
+      .andThen(blueChargeWithEvents));
+    }
+  }
     return placeHigh()
     .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
-    .alongWith(blueChargeWithEvents))
+    .alongWith(driveCommand))
     .andThen(new Autobalance(BalancePoint.LEVEL));
   }
 

@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -154,7 +155,7 @@ public class GreekArm extends SubsystemBase {
     shoulderAngle.getVelocity();
     shoulderAngle.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
 
-    // ShuffleboardTab armTab = Shuffleboard.getTab("Greek Arm");
+     ShuffleboardTab armTab = Shuffleboard.getTab("Greek Arm");
     // armTab.addNumber("shoulderVelocity", () -> {
     //   return shoulderAngle.getVelocity();
     // });
@@ -195,9 +196,9 @@ public class GreekArm extends SubsystemBase {
     // armTab.addNumber("Target Elbow Angle", () -> {
     //   return targetElbowPosition.getDegrees();
     // });
-    // armTab.addString("Arm Position", () -> {
-    //   return currentArmPosition.name();
-    // });
+     armTab.addString("Arm Position", () -> {
+       return currentArmPosition.name();
+     });
     // armTab.addString("Arm Transition", () -> {
     //   return lastArmTransition;
     // });
@@ -474,6 +475,14 @@ public class GreekArm extends SubsystemBase {
             armPath.add(ArmPositions.PRE_PRE_PICKUP);
             armPath.add(ArmPositions.LEAVE_SCORING);
             break;
+            case SLAM_JAM:
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            armPath.add(ArmPositions.LEAVE_SCORING);
+            armPath.add(ArmPositions.HIGH_SCORE);
+            armPath.add(ArmPositions.SLAM_JAM);
+            break;
+            
         }
         break;
       case SAFE_TRANSITION:
@@ -622,17 +631,38 @@ public class GreekArm extends SubsystemBase {
             break;
           case PRE_SCORING:
             break;
+          case PRE_PRE_PICKUP:
+            armPath.add(ArmPositions.PRE_PRE_PICKUP);
+            break;
           case MID_SCORE:
             armPath.add(ArmPositions.MID_SCORE);
             break;
           case HIGH_SCORE:
             break;
+            case SLAM_JAM:
+            armPath.add(ArmPositions.SLAM_JAM);
+            break;
         }
         break;
+        case SLAM_JAM:
+        switch (targetArmPosition) {
+          case HOME:
+          armPath.add(ArmPositions.LEAVE_SCORING);
+          armPath.add(ArmPositions.SAFE_TRANSITION);
+          armPath.add(ArmPositions.HOME);
+          break;
+          case PICK_UP:
+            armPath.add(ArmPositions.PRE_SCORING);
+            armPath.add(ArmPositions.PRE_PICKUP);
+            armPath.add(ArmPositions.PICK_UP);
+          break;
     }
+    break;
+  }
     return armPath;
   }
 
+  
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
