@@ -12,6 +12,7 @@ import frc.robot.commands.LightUpCone;
 import frc.robot.commands.LightUpCube;
 import frc.robot.commands.LowerIntake;
 import frc.robot.commands.ManualArm;
+import frc.robot.commands.MoveArmMeters;
 import frc.robot.commands.MoveArmToArmPosition;
 import frc.robot.commands.MoveArmToPosition;
 import frc.robot.commands.OpenGripper;
@@ -124,7 +125,16 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
 
     m_driverController.rightTrigger().whileTrue(new RunIntake(.75));
     m_driverController.button(7).whileTrue(new RunIntake(.5));
-    m_driverController.leftTrigger().onTrue(new WaitCommand(1).alongWith(new MoveArmToArmPosition(ArmPositions.SLAM_JAM)).andThen(new OpenGripper()));
+    m_driverController.leftTrigger().onTrue(new MoveArmToArmPosition(ArmPositions.SLAM_JAM).withTimeout(0.5)
+                                            .andThen(new OpenGripper())
+                                            .andThen(new MoveArmToArmPosition(ArmPositions.PICK_UP))
+                                            .andThen(new InstantCommand(() -> {m_conveyer.closeConveyer();})));
+
+                                            // m_driverController.leftTrigger().onTrue(new MoveArmMeters(0.0, -0.2, 3.0).withTimeout(0.5)
+    //                                         .andThen(new OpenGripper())
+    //                                         .andThen(new MoveArmMeters(0.0, 0.2, 5.0).withTimeout(0.5))
+    //                                         .andThen(new MoveArmToArmPosition(ArmPositions.PICK_UP))
+    //                                         .andThen(new InstantCommand(() -> {m_conveyer.closeConveyer();})));
 
     m_operatorController.povLeft().onTrue(new LightUpCone());
     m_operatorController.povRight().onTrue(new LightUpCube());

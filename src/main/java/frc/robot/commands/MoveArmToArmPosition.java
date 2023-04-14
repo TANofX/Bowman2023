@@ -5,13 +5,17 @@
 package frc.robot.commands;
 
 import java.util.LinkedList;
+import java.util.List;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ArmPositions;
+import frc.robot.subsystems.GreekArm;
 
 public class MoveArmToArmPosition extends CommandBase {
   private ArmPositions targetArmPosition = ArmPositions.UNKNOWN;
@@ -29,6 +33,9 @@ public class MoveArmToArmPosition extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    if ((targetArmPosition == ArmPositions.SLAM_JAM) && (RobotContainer.m_arm.getArmPosition() == ArmPositions.MID_SCORE)) {
+      targetArmPosition = ArmPositions.MID_SLAM_JAM;
+    }
     armPathway = RobotContainer.m_arm.getPath(targetArmPosition);
     currentTarget = armPathway.peekFirst();
     goToNextPoint();
@@ -37,6 +44,24 @@ public class MoveArmToArmPosition extends CommandBase {
     } else {
       initializationFailed = false;
     }
+
+    Rotation2d elbowRotation = RobotContainer.m_arm.getElbowPosition();
+    Rotation2d shoulderRotation = RobotContainer.m_arm.getShoulderPosition();
+
+    Translation3d handPosition = GreekArm.calculateKinematics(shoulderRotation.getDegrees(), elbowRotation.getDegrees());
+
+    Translation3d movement = new Translation3d(0.0, 0.0, -0.2);
+
+    Translation3d targetHandPosition = handPosition.plus(movement);
+
+    List<Rotation2d> rotations = GreekArm.calculateInverseKinematics(targetHandPosition.getX(), targetHandPosition.getZ());
+    Rotation2d targetShoulder = Rotation2d.fromDegrees(GreekArm.normalizeShoulderAngle(rotations.get(0).getDegrees()));
+    Rotation2d targetElbow = Rotation2d.fromDegrees(GreekArm.normalizeElbowAngle(rotations.get(1).getDegrees()));
+
+    SmartDashboard.putNumber("StartingShoulder", shoulderRotation.getDegrees());
+    SmartDashboard.putNumber("Starting Elbow", elbowRotation.getDegrees());
+    SmartDashboard.putNumber("Target Shoulder", targetShoulder.getDegrees());
+    SmartDashboard.putNumber("Target Elbow", targetElbow.getDegrees());
   }
 
   private void goToNextPoint() {

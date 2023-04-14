@@ -267,8 +267,8 @@ public class GreekArm extends SubsystemBase {
     shoulder = Math.atan2(zPrime, x) - Math.atan2(Constants.APOLLO_LENGTH * Math.sin(elbow),
         Constants.ARTEMIS_LENGTH + Constants.APOLLO_LENGTH * Math.cos(elbow));
 
-    returnList.add(new Rotation2d(shoulder));
-    returnList.add(new Rotation2d(elbow));
+    returnList.add(Rotation2d.fromDegrees(normalizeShoulderAngle((new Rotation2d(shoulder)).getDegrees())));
+    returnList.add(Rotation2d.fromDegrees(normalizeElbowAngle((new Rotation2d(elbow)).getDegrees())));
 
     return returnList;
   }
@@ -593,8 +593,24 @@ public class GreekArm extends SubsystemBase {
           case HIGH_SCORE:
             armPath.add(ArmPositions.HIGH_SCORE);
             break;
+          case MID_SLAM_JAM:
+            armPath.add(ArmPositions.MID_SLAM_JAM);
+            break;
         }
         break;
+      case MID_SLAM_JAM:
+        switch(targetArmPosition) {
+          case HOME:
+          armPath.add(ArmPositions.LEAVE_SCORING);
+          armPath.add(ArmPositions.SAFE_TRANSITION);
+          armPath.add(ArmPositions.HOME);
+          break;
+          case PICK_UP:
+          armPath.add(ArmPositions.PRE_SCORING);
+          armPath.add(ArmPositions.PRE_PICKUP);
+          armPath.add(ArmPositions.PICK_UP);
+        break;
+        }
       case PRE_PRE_PICKUP:
         switch (targetArmPosition) {
           case HOME:
@@ -700,7 +716,7 @@ public class GreekArm extends SubsystemBase {
     currentArmPosition = ArmPositions.getPosition(currentShoulderAngle, currentElbowAngle);
   }
 
-  private double normalizeElbowAngle(double angleInDegrees) {
+  public static double normalizeElbowAngle(double angleInDegrees) {
     if (angleInDegrees > 180.0) {
       return angleInDegrees - 360.0;
     }
@@ -712,7 +728,7 @@ public class GreekArm extends SubsystemBase {
     return angleInDegrees;
   }
 
-  private double normalizeShoulderAngle(double angleInDegrees) {
+  public static double normalizeShoulderAngle(double angleInDegrees) {
     if (angleInDegrees > 360.0) {
       return angleInDegrees - 360.0;
     }
