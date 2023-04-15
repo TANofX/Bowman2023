@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -548,6 +549,24 @@ public class GreekArm extends SubsystemBase {
             armPath.add(ArmPositions.PRE_SCORING);
             armPath.add(ArmPositions.LEAVE_SCORING);
             armPath.add(ArmPositions.HIGH_SCORE);
+            break;
+          case STOW_HIGH:
+            armPath.add(ArmPositions.PRE_PICKUP);
+            armPath.add(ArmPositions.STOW_HIGH);
+            break;
+        }
+        break;
+      case STOW_HIGH:
+        switch (targetArmPosition) {
+          case PICK_UP:
+            armPath.add(ArmPositions.PRE_PICKUP);
+            armPath.add(ArmPositions.PICK_UP);
+            break;
+          case HOME:
+            armPath.add(ArmPositions.HIGH_SCORE);
+            armPath.add(ArmPositions.LEAVE_SCORING);
+            armPath.add(ArmPositions.SAFE_TRANSITION);
+            armPath.add(ArmPositions.HOME);
             break;
         }
         break;

@@ -19,6 +19,7 @@ public enum ArmPositions {
     HIGH_SCORE(150, 20, 3.5),
     SLAM_JAM(147, 37, 3.5),
     MID_SLAM_JAM(128, 100, 3.0),
+    STOW_HIGH(40.0, 140.0, 1.0),
     UNKNOWN(251.5, -164.3);
     private static final double POSITION_TOLERANCE = 15.0;
     public Rotation2d shoulderRotation;

@@ -136,6 +136,8 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     //                                         .andThen(new MoveArmToArmPosition(ArmPositions.PICK_UP))
     //                                         .andThen(new InstantCommand(() -> {m_conveyer.closeConveyer();})));
 
+    m_operatorController.leftTrigger().onTrue(new MoveArmToArmPosition(ArmPositions.STOW_HIGH));
+
     m_operatorController.povLeft().onTrue(new LightUpCone());
     m_operatorController.povRight().onTrue(new LightUpCube());
 
