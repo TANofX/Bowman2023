@@ -284,14 +284,14 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
   }
 
   private Command placeHighBalance(String pathName) {
-    List<PathPlannerTrajectory> blueHighCharge = PathPlanner.loadPathGroup(pathName, new PathConstraints(Constants.AutoConstants.kMaxSpeedMetersPerSecond, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared));
+    List<PathPlannerTrajectory> blueHighCharge = PathPlanner.loadPathGroup(pathName, new PathConstraints(1.5, Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared));
     Command driveCommand = null;
     
     for (PathPlannerTrajectory p : blueHighCharge) {
     Command blueChargeCommand = m_drivetrainSubsystem.followTrajectoryCommand(p, driveCommand == null);
     Command blueChargeWithEvents = new FollowPathWithEvents(blueChargeCommand, p.getMarkers(), eventMap);
     if (driveCommand == null) {
-      driveCommand = new WaitCommand(2)
+      driveCommand = new WaitCommand(1)
       .andThen(blueChargeWithEvents);
     }
     else {
@@ -301,7 +301,7 @@ private SendableChooser<Command> autChooser = new SendableChooser<Command>();
     }
   }
     return placeHigh()
-    .andThen(new MoveArmToArmPosition(ArmPositions.HOME)
+    .andThen(new MoveArmToArmPosition(ArmPositions.PICK_UP)
     .alongWith(driveCommand))
     .andThen(new Autobalance(BalancePoint.LEVEL));
   }
